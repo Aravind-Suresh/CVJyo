@@ -1,5 +1,5 @@
 #include<opencv2/opencv.hpp>
-#include<iostream.h>
+#include<iostream>
 
 using namespace cv;
 using namespace std;
@@ -62,11 +62,6 @@ int main(int argc, char** argv) {
 		imshow("img_gray_edge_inv",img_gray_edge_inv);
 
 	inRange(img_gray, 110, 255, img_skinmask);				//TODO : Make it adaptive
-	for(int x=0;x<img_skinmask.cols;x++) {
-		for(int y=0;y<10;y++) {
-			img_skinmask.at<uchar>(y,x) = 0;
-		}
-	}
 
 	bitwise_and(img_gray, img_gray, img_gray_bit_and, img_skinmask);
 	namedWindow("img_gray_bit_and", WINDOW_AUTOSIZE);
@@ -106,9 +101,9 @@ int main(int argc, char** argv) {
         namedWindow("img_gray_bit_and_morph1_bit_and_inv", WINDOW_AUTOSIZE);
         imshow("img_gray_bit_and_morph1_bit_and_inv",img_gray_bit_and_morph1_bit_and_inv);*/
         for(int i = 0; i < contours.size(); i++) {
-        	//for(int j = 0; j < contours[i].size(); j++)
-        		//cout<<contours[i][j]<<endl;
-        	//cout<<endl;
+        	for(int j = 0; j < contours[i].size(); j++)
+        		cout<<contours[i][j]<<endl;
+        	cout<<endl;
         	arcl.push_back(arcLength(contours[i], true));
         	if(i==0) {
         		a=arcl[0];
@@ -123,9 +118,6 @@ int main(int argc, char** argv) {
         vector<int> hull(contours[pos].size());
         vector<Vec4i> convexityDefectsSet;
         convexHull(contours[pos], hull, false, false );
-        drawContours(img_gray,contours,-1, Scalar(255,0,0),CV_FILLED, 8);
-        namedWindow("img_gray_contour",WINDOW_AUTOSIZE);
-        imshow("img_gray_contour",img_gray);
 	/*for(int k=0;k<contours[pos].size();k++) {
 		cout<<hull[k]<<endl;
 	}*/
@@ -140,7 +132,8 @@ int main(int argc, char** argv) {
 			cout << startIdx << ' ' << endIdx << ' ' << defectPtIdx << ' ' << depth << endl;
 
 			Scalar color = Scalar( 255,0,0 );
-			circle(img_gray_bit_and_morph1, contours[pos][defectPtIdx] , 10, color, 2, 8, 0 );
+			Point2f p(defectPtIdx, defectPtIdx);
+			circle(img_gray_bit_and_morph1, p , 10, color, 2, 8, 0 );
 			namedWindow("img_hull", WINDOW_AUTOSIZE);
 			imshow("img_hull",img_gray_bit_and_morph1);
 		}
@@ -157,7 +150,6 @@ int main(int argc, char** argv) {
 		destroyWindow("img_gray_bit_and");
 		destroyWindow("img_gray_bit_and_morph1");
 		destroyWindow("img_gray_bit_and_morph1_bit_and");
-		destroyWindow("img_gray_contour");
 	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv");
 	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv_open");
 
