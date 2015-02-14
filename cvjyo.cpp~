@@ -97,9 +97,9 @@ int main(int argc, char** argv) {
         drawContours( img_gray_bit_and_morph1_bit_and_inv, contours, idx, color, CV_FILLED, 8, hierarchy );
     }*/
 
-        drawContours( img_gray_bit_and_morph1_bit_and_inv, contours, 3, color, CV_FILLED, 8, hierarchy );
+        /*drawContours( img_gray_bit_and_morph1_bit_and_inv, contours, 3, color, CV_FILLED, 8, hierarchy );
         namedWindow("img_gray_bit_and_morph1_bit_and_inv", WINDOW_AUTOSIZE);
-        imshow("img_gray_bit_and_morph1_bit_and_inv",img_gray_bit_and_morph1_bit_and_inv);
+        imshow("img_gray_bit_and_morph1_bit_and_inv",img_gray_bit_and_morph1_bit_and_inv);*/
         for(int i = 0; i < contours.size(); i++) {
         	for(int j = 0; j < contours[i].size(); j++)
         		cout<<contours[i][j]<<endl;
@@ -115,26 +115,41 @@ int main(int argc, char** argv) {
         	}
         	cout<<a<<endl<<pos;
         }
-	vector<Point> hull(contours[pos].size());
-	vector<Vec4i> convexity_Defects;
-	convexHull(contours[pos], hull, false, false );
-	for(int k=0;k<contours[pos].size();k++) {
+        vector<int> hull(contours[pos].size());
+        vector<Vec4i> convexityDefectsSet;
+        convexHull(contours[pos], hull, false, false );
+	/*for(int k=0;k<contours[pos].size();k++) {
 		cout<<hull[k]<<endl;
-	}
-//	convexityDefects(contours[pos], hull, convexity_Defects);
+	}*/
+	//drawContours( drawing, hull, s, Scalar(0,255,255), 1, 8, vector<Vec4i>(), 0, Point() );
+		convexityDefects(contours[pos], hull, convexityDefectsSet);
+		for(int k=0;k<convexityDefectsSet.size();k++) {
+			int startIdx = convexityDefectsSet[k].val[0];
+			int endIdx = convexityDefectsSet[k].val[1];
+			int defectPtIdx = convexityDefectsSet[k].val[2];
+			double depth = static_cast<double>(convexityDefectsSet[k].val[3]) / 256.0;
+
+			cout << startIdx << ' ' << endIdx << ' ' << defectPtIdx << ' ' << depth << endl;
+
+			Scalar color = Scalar( 255,0,0 );
+			Point2f p(defectPtIdx, defectPtIdx);
+			circle(img_gray_bit_and_morph1, p , 10, color, 2, 8, 0 );
+			namedWindow("img_hull", WINDOW_AUTOSIZE);
+			imshow("img_hull",img_gray_bit_and_morph1);
+		}
 
 	//morphologyEx(img_gray_bit_and_morph1_bit_and_inv, img_gray_bit_and_morph1_bit_and_inv_open, MORPH_OPEN, kernelOpen, Point(-1,-1), 1, BORDER_CONSTANT);
 	//namedWindow("img_gray_bit_and_morph1_bit_and_inv_open", WINDOW_AUTOSIZE);
 	//imshow("img_gray_bit_and_morph1_bit_and_inv_open",img_gray_bit_and_morph1_bit_and_inv_open);
 
-        	waitKey(0);
+		waitKey(0);
 
-        	destroyWindow("img_gray");
-        	destroyWindow("img_gray_edge");
-        	destroyWindow("img_gray_edge_inv");
-        	destroyWindow("img_gray_bit_and");
-        	destroyWindow("img_gray_bit_and_morph1");
-        	destroyWindow("img_gray_bit_and_morph1_bit_and");
+		destroyWindow("img_gray");
+		destroyWindow("img_gray_edge");
+		destroyWindow("img_gray_edge_inv");
+		destroyWindow("img_gray_bit_and");
+		destroyWindow("img_gray_bit_and_morph1");
+		destroyWindow("img_gray_bit_and_morph1_bit_and");
 	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv");
 	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv_open");
 
