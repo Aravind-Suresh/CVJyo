@@ -1,5 +1,5 @@
 #include<opencv2/opencv.hpp>
-#include<iostream.h>
+#include<iostream>
 
 using namespace cv;
 using namespace std;
@@ -140,7 +140,7 @@ int main(int argc, char** argv) {
 			cout << startIdx << ' ' << endIdx << ' ' << defectPtIdx << ' ' << depth << endl;
 
 			Scalar color = Scalar( 255,0,0 );
-			circle(img_gray_bit_and_morph1, contours[pos][defectPtIdx] , 10, color, 2, 8, 0 );
+			circle(img_gray_bit_and_morph1, contours[pos][startIdx] , 10, color, 2, 8, 0 );
 			namedWindow("img_hull", WINDOW_AUTOSIZE);
 			imshow("img_hull",img_gray_bit_and_morph1);
 		}
