@@ -12,7 +12,7 @@ void CannyThreshold(Mat src_gray, Mat& edge_gray, int lowThreshold, int highThre
 
 bool comparatorContourAreas ( vector<Point> c1, vector<Point> c2 ) {
 	double i = fabs( contourArea(Mat(c1)) );
-	double j = fabs( contourArea(::Mat(c2)) );
+	double j = fabs( contourArea(Mat(c2)) );
 	return ( i < j );
 }
 
@@ -102,7 +102,7 @@ int main(int argc, char** argv) {
 	namedWindow("img_gray_bit_and_morph1_bit_and_inv_temp", WINDOW_AUTOSIZE);
 	imshow("img_gray_bit_and_morph1_bit_and_inv_temp",img_gray_bit_and_morph1_bit_and_inv_temp);
 
-	findContours(img_gray_bit_and_morph1_bit_and_inv, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+	findContours(img_gray_bit_and_morph1_bit_and_inv, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 	Scalar color( 255, 0, 0 );
 	/*int idx = 0;
     for( ; idx >= 0; idx = hierarchy[idx][0] )
@@ -114,7 +114,7 @@ int main(int argc, char** argv) {
         /*drawContours( img_gray_bit_and_morph1_bit_and_inv, contours, 3, color, CV_FILLED, 8, hierarchy );
         namedWindow("img_gray_bit_and_morph1_bit_and_inv", WINDOW_AUTOSIZE);
         imshow("img_gray_bit_and_morph1_bit_and_inv",img_gray_bit_and_morph1_bit_and_inv);*/
-        for(int i = 0; i < contours.size(); i++) {
+        for(int i = 2; i < contours.size(); i++) {
         	//for(int j = 0; j < contours[i].size(); j++)
         		//cout<<contours[i][j]<<endl;
         	//cout<<endl;
@@ -127,19 +127,26 @@ int main(int argc, char** argv) {
         		a = arcl[i];
         		pos = i;
         	}
-        	cout<<a<<endl<<pos;
+        	//cout<<a<<endl<<pos;
         }
         vector<int> hull(contours[pos].size());
         vector<Vec4i> convexityDefectsSet;
 
         sort(contours.begin(),contours.end(),comparatorContourAreas);
+        int size1 = contours.size();
+        convexHull(contours[size1-2], hull, false, false );
 
-        convexHull(contours[pos], hull, false, false );
        /* for(int id=0;id<5;id++) {
         	drawContours(img_gray,contours,contours.size()-id-1, Scalar(50*id,50*id,50*id),CV_FILLED, 8);
         	cout<<"contour drawn "<<id<<endl;
         }*/
-        	drawContours(img_gray,contours,contours.size()-1, Scalar(0,0,0),CV_FILLED, 8);
+        	cout<<"\nHERE SIZE"<<contours.size();
+        	//for(int jk=contours.size()-3;jk>0;jk--)
+        	{
+        	Scalar color( 0,0,0 );
+        	drawContours(img_gray,contours,contours.size()-2, color,2, 8, hierarchy);
+
+        	}
         	
         	namedWindow("img_gray_contour",WINDOW_AUTOSIZE);
         	imshow("img_gray_contour",img_gray);
@@ -147,8 +154,8 @@ int main(int argc, char** argv) {
 	/*for(int k=0;k<contours[pos].size();k++) {
 		cout<<hull[k]<<endl;
 	}*/
-	//drawContours( drawing, hull, s, Scalar(0,255,255), 1, 8, vector<Vec4i>(), 0, Point() );
-		/*convexityDefects(contours[pos], hull, convexityDefectsSet);
+	drawContours( drawing, hull, s, Scalar(0,255,255), 1, 8, vector<Vec4i>(), 0, Point() );
+		convexityDefects(contours[pos], hull, convexityDefectsSet);
 		for(int k=0;k<convexityDefectsSet.size();k++) {
 			int startIdx = convexityDefectsSet[k].val[0];
 			int endIdx = convexityDefectsSet[k].val[1];
@@ -162,13 +169,13 @@ int main(int argc, char** argv) {
 			namedWindow("img_hull", WINDOW_AUTOSIZE);
 			imshow("img_hull",img_gray_bit_and_morph1);
 		}
-*/
+
 	//morphologyEx(img_gray_bit_and_morph1_bit_and_inv, img_gray_bit_and_morph1_bit_and_inv_open, MORPH_OPEN, kernelOpen, Point(-1,-1), 1, BORDER_CONSTANT);
 	//namedWindow("img_gray_bit_and_morph1_bit_and_inv_open", WINDOW_AUTOSIZE);
 	//imshow("img_gray_bit_and_morph1_bit_and_inv_open",img_gray_bit_and_morph1_bit_and_inv_open);
 
 
-		add(img_gray, img_gray_edge_inv, img_gray_sharp, noArray(), -1);
+		add(img_gray_edge, img_gray, img_gray_sharp, noArray(), -1);
 		namedWindow("img_gray_sharp", WINDOW_AUTOSIZE);
 		imshow("img_gray_sharp", img_gray_sharp);
 
