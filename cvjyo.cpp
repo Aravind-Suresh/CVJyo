@@ -129,12 +129,23 @@ int main(int argc, char** argv) {
         	}
         	//cout<<a<<endl<<pos;
         }
-        vector<int> hull(contours[pos].size());
+        
         vector<Vec4i> convexityDefectsSet;
 
         sort(contours.begin(),contours.end(),comparatorContourAreas);
         int size1 = contours.size();
-        convexHull(contours[size1-2], hull, false, false );
+        
+        
+        vector<vector<int> >hulls( contours.size() );
+
+        convexHull(Mat(contours[size1-2]), hulls[1],false);
+        cout<<"PODA MOKKA NAAYE";
+        //Mat drawing(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+        Mat drawing = Mat::zeros( img_gray.size(), CV_8UC3 );
+        cout<<hulls[1].size()<<endl;
+        drawContours( drawing, hulls, -1, color, 1, 8);
+        namedWindow( "Hull demo", WINDOW_AUTOSIZE );
+        imshow( "Hull demo", drawing );
 
        /* for(int id=0;id<5;id++) {
         	drawContours(img_gray,contours,contours.size()-id-1, Scalar(50*id,50*id,50*id),CV_FILLED, 8);
@@ -143,8 +154,8 @@ int main(int argc, char** argv) {
         	cout<<"\nHERE SIZE"<<contours.size();
         	//for(int jk=contours.size()-3;jk>0;jk--)
         	{
-        	Scalar color( 0,0,0 );
-        	drawContours(img_gray,contours,contours.size()-2, color,2, 8, hierarchy);
+        		Scalar color( 0,0,0 );
+        		drawContours(img_gray,contours,contours.size()-2, color,2, 8, hierarchy);
 
         	}
         	
@@ -154,8 +165,8 @@ int main(int argc, char** argv) {
 	/*for(int k=0;k<contours[pos].size();k++) {
 		cout<<hull[k]<<endl;
 	}*/
-	drawContours( drawing, hull, s, Scalar(0,255,255), 1, 8, vector<Vec4i>(), 0, Point() );
-		convexityDefects(contours[pos], hull, convexityDefectsSet);
+
+		convexityDefects(contours[pos], hulls[1], convexityDefectsSet);
 		for(int k=0;k<convexityDefectsSet.size();k++) {
 			int startIdx = convexityDefectsSet[k].val[0];
 			int endIdx = convexityDefectsSet[k].val[1];
@@ -204,6 +215,7 @@ int main(int argc, char** argv) {
 		destroyWindow("img_gray_contour");
 		destroyWindow("img_gray_circles");
 		destroyWindow("img_gray_sharp");
+		destroyWindow("Hull demo");
 	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv");
 	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv_open");
 
