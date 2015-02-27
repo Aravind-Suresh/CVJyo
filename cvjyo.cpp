@@ -13,6 +13,7 @@ void CannyThreshold(Mat src_gray, Mat& edge_gray, int lowThreshold, int highThre
 int main(int argc, char** argv) {
 	Mat img_gray = imread(argv[1], CV_LOAD_IMAGE_GRAYSCALE);
 	Mat img_gray_edge(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+	Mat img_gray_contours(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_edge_inv(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_skinmask(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_bit_and(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
@@ -105,6 +106,8 @@ int main(int argc, char** argv) {
         /*drawContours( img_gray_bit_and_morph1_bit_and_inv, contours, 3, color, CV_FILLED, 8, hierarchy );
         namedWindow("img_gray_bit_and_morph1_bit_and_inv", WINDOW_AUTOSIZE);
         imshow("img_gray_bit_and_morph1_bit_and_inv",img_gray_bit_and_morph1_bit_and_inv);*/
+        findContours(img_gray,contours,3,color,CV_FILLED,8,hierarchy);
+        drawContours(img_gray_bit_and,contours,3,color,CV_FILLED,8,hierarchy);
         for(int i = 0; i < contours.size(); i++) {
         	//for(int j = 0; j < contours[i].size(); j++)
         		//cout<<contours[i][j]<<endl;
@@ -123,9 +126,11 @@ int main(int argc, char** argv) {
         vector<int> hull(contours[pos].size());
         vector<Vec4i> convexityDefectsSet;
         convexHull(contours[pos], hull, false, false );
+        cout<<contours.size();
         drawContours(img_gray,contours,-1, Scalar(255,0,0),CV_FILLED, 8);
         namedWindow("img_gray_contour",WINDOW_AUTOSIZE);
         imshow("img_gray_contour",img_gray);
+
 	/*for(int k=0;k<contours[pos].size();k++) {
 		cout<<hull[k]<<endl;
 	}*/
