@@ -17,6 +17,12 @@ bool comparatorContourAreas ( vector<Point> c1, vector<Point> c2 ) {
 	return ( i < j );
 }
 
+bool comparatorConvexityDefectsSetDepth (Vec4i a, Vec4i b) {
+	double i = static_cast<double>(a.val[3]);
+	double j = static_cast<double>(b.val[3]);
+	return ( i < j );
+}
+
 int main(int argc, char** argv) {
 	Mat img_gray = imread(argv[1], CV_LOAD_IMAGE_GRAYSCALE);
 	Mat img_gray_edge(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
@@ -197,6 +203,9 @@ int main(int argc, char** argv) {
 		img_gray.copyTo(img_hull_3);
 
 		convexityDefects(contours[size1-2], hulls[1], convexityDefectsSet);
+
+		sort(convexityDefectsSet.begin(), convexityDefectsSet.end(), comparatorConvexityDefectsSetDepth);
+
 		for(int k=0;k<convexityDefectsSet.size();k++) {
 			int startIdx = convexityDefectsSet[k].val[0];
 			int endIdx = convexityDefectsSet[k].val[1];
