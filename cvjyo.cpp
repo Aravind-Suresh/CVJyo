@@ -4,11 +4,31 @@
 using namespace cv;
 using namespace std;
 
+
+Point G_clockwiseRef;
+
+
 void CannyThreshold(Mat src_gray, Mat& edge_gray, int lowThreshold, int highThreshold, int kernel_size)
 {
 	blur( src_gray, edge_gray, Size(3,3) );
 	//GaussianBlur( src_gray, edge_gray, Size(5,5), 2, 2 );
 	Canny( edge_gray, edge_gray, lowThreshold, highThreshold, kernel_size );
+}
+
+
+int slopeStrLine(Point a, Point b)
+{
+	if(a.x-b.x)
+return (a.y-b.y)/(a.x-b.x);
+
+}
+
+bool comparatorClockwise(Point a,Point b)
+{
+if(slopeStrLine(a,G_clockwiseRef)>slopeStrLine(b,G_clockwiseRef))
+	return true;
+else return false;
+
 }
 
 bool checkPointInRegion(Mat src, float perx, float pery,Point p)
@@ -250,6 +270,7 @@ int main(int argc, char** argv) {
 				color = Scalar(255,255,255);
 			}
 
+
 			circle(img_gray_temp, contours[size1-2][defectPtIdx] , 10, color, 2, 8, 0 );
 			circle(img_hull_black, contours[size1-2][startIdx] , 10, color, 2, 8, 0 );
 			circle(img_hull_3, contours[size1-2][endIdx] , 10, color, 2, 8, 0 );
@@ -268,6 +289,11 @@ int main(int argc, char** argv) {
 		minEnclosingCircle(defectsPoints, minEncCirCenter, minEncRad);
 		circle(img_defects_1, minEncCirCenter, minEncRad, Scalar(255,255,255), -1, 8, 0);*/
 		cout<<"defects points size : "<<defectsPoints.size()<<endl;
+
+
+		G_clockwiseRef=defectsPoints[0];
+
+		sort(defectsPoints.begin(),defectsPoints.end(),comparatorClockwise);
 
 		fillConvexPoly(img_defects_1, &defectsPoints[0], defectsPoints.size(), Scalar(255,255,255), 8);
 
