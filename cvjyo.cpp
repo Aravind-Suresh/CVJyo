@@ -10,7 +10,17 @@ void CannyThreshold(Mat src_gray, Mat& edge_gray, int lowThreshold, int highThre
 	//GaussianBlur( src_gray, edge_gray, Size(5,5), 2, 2 );
 	Canny( edge_gray, edge_gray, lowThreshold, highThreshold, kernel_size );
 }
-
+void binaryAbsDiff(Mat src1, Mat src2, Mat& res )
+{   for(int i=0;i<src1.rows;i++)
+	{	for(int j=0;j<src1.cols;j++)
+		{
+		if(src1.at<uchar> (i,j)>src2.at<uchar>(i,j))
+			res.at<uchar>(i,j)=1;
+		else
+			res.at<uchar>(i,j)=0;
+	     }
+	}
+}
 bool checkPointInRegion(Mat src, float perx, float pery,Point p)
 {
 	//TODO : fill the function here
@@ -31,6 +41,11 @@ bool comparatorConvexityDefectsSetDepth (Vec4i a, Vec4i b) {
 
 int main(int argc, char** argv) {
 	Mat img_gray = imread(argv[1], CV_LOAD_IMAGE_GRAYSCALE);
+	Mat img_rgb = imread(argv[1], CV_LOAD_IMAGE_COLOR);
+	Mat img_hsv(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+	cvtColor(img_rgb,img_hsv,CV_RGB2HSV);
+    namedWindow("win1", CV_WINDOW_AUTOSIZE);
+    imshow("win1", img_hsv);
 	Mat img_gray_edge(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_contours(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_edge_inv(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
@@ -49,8 +64,8 @@ int main(int argc, char** argv) {
 
 	Mat img_defects_1(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_defects_2(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-	Mat img_defects_3(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-	
+	Mat img_defects_3_bin(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+	Mat saturated(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	img_gray.copyTo(img_gray_temp);
 	vector<vector<Point> > contours;
 	vector<int> arcl;
@@ -65,7 +80,9 @@ int main(int argc, char** argv) {
 		MORPH_RECT = 0,
 		MORPH_CROSS = 1,
 		MORPH_ELLIPSE = 2
+
 	*/
+
 		int dilation_type[] = {0,1,2};
 		int dilation_size = 2;
 
@@ -82,15 +99,23 @@ int main(int argc, char** argv) {
 
 		namedWindow("img_gray",WINDOW_AUTOSIZE);
 		imshow("img_gray",img_gray);
+        
+
 
 		CannyThreshold(img_gray, img_gray_edge, lowThreshold, lowThreshold*ratio, kernel_size);
 		namedWindow("img_gray_edge", WINDOW_AUTOSIZE);
 		imshow("img_gray_edge",img_gray_edge);
-
+        
 		bitwise_not(img_gray_edge, img_gray_edge_inv);
 		namedWindow("img_gray_edge_inv", WINDOW_AUTOSIZE);
 		imshow("img_gray_edge_inv",img_gray_edge_inv);
+        double saturation = 10;
+double scale = 1;
 
+// what it does here is dst = (uchar) ((double)src*scale+saturation); 
+img_gray.convertTo(saturated, CV_8UC1, scale, saturation); 
+namedWindow("img_gray_sat", WINDOW_AUTOSIZE);
+		imshow("img_gray_sat", img_gray_sharp);
 	inRange(img_gray, 110, 255, img_skinmask);				//TODO : Make it adaptive
 	for(int x=0;x<img_skinmask.cols;x++) {
 		for(int y=0;y<10;y++) {
@@ -161,7 +186,7 @@ int main(int argc, char** argv) {
         vector<vector<int> >hulls( contours.size() );
 
         convexHull(Mat(contours[size1-2]), hulls[1],false);
-        cout<<"PODA MOKKA NAAYE";
+        cout<<"PODA MOKKA NAAYE"<<endl;
         //Mat drawing(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
         Mat drawing = Mat::zeros( img_gray.size(), CV_8UC3 );
         cout<<hulls[1].size()<<endl;
@@ -178,7 +203,7 @@ int main(int argc, char** argv) {
         	drawContours(img_gray,contours,contours.size()-id-1, Scalar(50*id,50*id,50*id),CV_FILLED, 8);
         	cout<<"contour drawn "<<id<<endl;
         }*/
-        	cout<<"\nHERE SIZE"<<contours.size();
+        	cout<<"\nHERE SIZE"<<contours.size()<<endl;
         	//for(int jk=contours.size()-3;jk>0;jk--)
         	{
         		Scalar color( 0,0,0 );
@@ -270,6 +295,8 @@ int main(int argc, char** argv) {
 		add(img_gray_edge, img_gray, img_gray_sharp, noArray(), -1);
 		namedWindow("img_gray_sharp", WINDOW_AUTOSIZE);
 		imshow("img_gray_sharp", img_gray_sharp);
+
+		
 /*
 		GaussianBlur( img_gray_temp, img_gray_temp, Size(5, 5), 2, 1000 );
 		vector<Vec3f> circles;
@@ -284,7 +311,9 @@ int main(int argc, char** argv) {
 		}
 		namedWindow("img_gray_circles",WINDOW_AUTOSIZE);
 		imshow("img_gray_circles",img_gray_temp);
+
 */
+		
 		waitKey(0);
 
 		destroyWindow("img_gray");
@@ -297,11 +326,13 @@ int main(int argc, char** argv) {
 		//destroyWindow("img_gray_circles");
 		destroyWindow("img_gray_sharp");
 		destroyWindow("Hull demo");
+		destroyWindow("img_gray_sat");
 		destroyWindow("img_hull_start");
 		destroyWindow("img_hull_end");
 		destroyWindow("img_hull");
 		destroyWindow("img_hull_defect");
 		destroyWindow("img_defects_1");
+		destroyWindow("win1");
 	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv");
 	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv_open");
 
