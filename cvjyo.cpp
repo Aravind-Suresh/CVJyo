@@ -6,7 +6,8 @@ using namespace std;
 
 void CannyThreshold(Mat src_gray, Mat& edge_gray, int lowThreshold, int highThreshold, int kernel_size)
 {
-	blur( src_gray, edge_gray, Size(3,3) );
+	//blur( src_gray, edge_gray, Size(3,3) );
+	GaussianBlur( src_gray, edge_gray, Size(5,5), 2, 2 );
 	Canny( edge_gray, edge_gray, lowThreshold, highThreshold, kernel_size );
 }
 
@@ -27,7 +28,7 @@ int main(int argc, char** argv) {
 	Mat img_gray_bit_and_morph1_bit_and(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_bit_and_morph1_bit_and_inv(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_bit_and_morph1_bit_and_inv_temp(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-	Mat img_gray_bit_and_morph1_bit_and_inv_open(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+	Mat img_gray_bit_and_morph1_bit_andbit_and_inv_open(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_temp(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_sharp(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_hull_black(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
