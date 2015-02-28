@@ -14,7 +14,16 @@ void CannyThreshold(Mat src_gray, Mat& edge_gray, int lowThreshold, int highThre
 bool checkPointInRegion(Mat src, float perx, float pery,Point p)
 {
 	//TODO : fill the function here
+	int width = src.cols;
+	int height = src.rows;
+	int x1 = width*perx;
+	int x2 = width - x1;
+	int y1 = height*pery;
+	int y2 = height - y1;
 
+	if(p.x>x1 && p.x<x2 && p.y>y1 && p.y<y2)
+		return true;
+	else return false;
 }
 
 bool comparatorContourAreas ( vector<Point> c1, vector<Point> c2 ) {
@@ -215,8 +224,8 @@ int main(int argc, char** argv) {
 
 		convexityDefects(contours[size1-2], hulls[1], convexityDefectsSet);
 
-		int filterThreshDepth = 13;
-		vector<Point> defectsPoints(convexityDefectsSet.size()-filterThreshDepth);
+		int filterThreshDepth = 10;
+		vector<Point> defectsPoints;
 
 		sort(convexityDefectsSet.begin(), convexityDefectsSet.end(), comparatorConvexityDefectsSetDepth);
 
@@ -231,9 +240,13 @@ int main(int argc, char** argv) {
 			cout << startIdx << ' ' << endIdx << ' ' << defectPtIdx << ' ' << depth << endl;
 
 			Scalar color = Scalar( 0,0,0 );
+			float toleranceFractionPointX = 0.05;
+			float toleranceFractionPointY = 0.05;
 
-			if(k>=filterThreshDepth) {
-				defectsPoints.push_back(contours[size1-2][defectPtIdx]);
+			Point p = contours[size1-2][defectPtIdx];
+			if(k>=filterThreshDepth && checkPointInRegion(img_gray, toleranceFractionPointX, toleranceFractionPointY, p)) {
+				cout<<"Defect point : "<<k<<" ("<<p.x<<","<<p.y<<")";
+				defectsPoints.push_back(p);
 				color = Scalar(255,255,255);
 			}
 
@@ -254,11 +267,15 @@ int main(int argc, char** argv) {
 
 		minEnclosingCircle(defectsPoints, minEncCirCenter, minEncRad);
 		circle(img_defects_1, minEncCirCenter, minEncRad, Scalar(255,255,255), -1, 8, 0);*/
+		cout<<"defects points size : "<<defectsPoints.size()<<endl;
 
 		fillConvexPoly(img_defects_1, &defectsPoints[0], defectsPoints.size(), Scalar(255,255,255), 8);
 
-		//fillPoly(img_defects_1, defectsPointsArray, defectsPoints.size(), Scalar(255,255,255), 8);
+		/*vector<vector<Point> > defectsPointsArray(1);
+		defectsPointsArray[0]=defectsPoints;
 
+		fillPoly(img_defects_1, defectsPointsArray, defectsPoints.size(), Scalar(255,255,255), 8);
+*/
 		namedWindow("img_defects_1", WINDOW_AUTOSIZE);
 		imshow("img_defects_1", img_defects_1);
 
