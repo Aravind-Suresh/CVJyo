@@ -23,19 +23,19 @@ void CannyThreshold(Mat src_gray, Mat& edge_gray, int lowThreshold, int highThre
 	//GaussianBlur( src_gray, edge_gray, Size(5,5), 2, 2 );
 	Canny( edge_gray, edge_gray, lowThreshold, highThreshold, kernel_size );
 }
-<<<<<<< HEAD
+
 void binaryAbsDiff(Mat src1, Mat src2, Mat& res )
 {   for(int i=0;i<src1.rows;i++)
 	{	for(int j=0;j<src1.cols;j++)
 		{
-		if(src1.at<uchar> (i,j)>src2.at<uchar>(i,j))
-			res.at<uchar>(i,j)=1;
+		if(src2.at<uchar> (i,j)>src1.at<uchar>(i,j))
+			res.at<uchar>(i,j)=255;
 		else
 			res.at<uchar>(i,j)=0;
 	     }
 	}
 }
-=======
+
 
 
 int slopeStrLine(Point a, Point b)
@@ -53,7 +53,6 @@ else return false;
 
 }
 
->>>>>>> 893703c06d725c0e71aea88ea20e4b01b1f198b3
 bool checkPointInRegion(Mat src, float perx, float pery,Point p)
 {
 	//TODO : fill the function here
@@ -355,9 +354,10 @@ namedWindow("img_gray_sat", WINDOW_AUTOSIZE);
 		add(img_gray_edge, img_gray, img_gray_sharp, noArray(), -1);
 		namedWindow("img_gray_sharp", WINDOW_AUTOSIZE);
 		imshow("img_gray_sharp", img_gray_sharp);
-
-		
-/*
+        binaryAbsDiff(img_gray_bit_and_morph1,img_defects_2,img_defects_3_bin);
+		namedWindow("img_defects_3_bin",WINDOW_AUTOSIZE);
+		imshow("img_defects_3_bin",img_defects_3_bin);
+/*      
 		GaussianBlur( img_gray_temp, img_gray_temp, Size(5, 5), 2, 1000 );
 		vector<Vec3f> circles;
 		for( size_t i = 0; i < circles.size(); i++ )
@@ -392,12 +392,9 @@ namedWindow("img_gray_sat", WINDOW_AUTOSIZE);
 		destroyWindow("img_hull");
 		destroyWindow("img_hull_defect");
 		destroyWindow("img_defects_1");
-<<<<<<< HEAD
-		destroyWindow("win1");
-=======
-		destroyWindow("img_defects_2");
 
->>>>>>> 893703c06d725c0e71aea88ea20e4b01b1f198b3
+		destroyWindow("img_defects_2");
+		destroyWindow("img_defects_3_bin");
 	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv");
 	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv_open");
 
