@@ -6,8 +6,8 @@ using namespace std;
 
 void CannyThreshold(Mat src_gray, Mat& edge_gray, int lowThreshold, int highThreshold, int kernel_size)
 {
-	//blur( src_gray, edge_gray, Size(3,3) );
-	GaussianBlur( src_gray, edge_gray, Size(5,5), 2, 2 );
+	blur( src_gray, edge_gray, Size(3,3) );
+	//GaussianBlur( src_gray, edge_gray, Size(5,5), 2, 2 );
 	Canny( edge_gray, edge_gray, lowThreshold, highThreshold, kernel_size );
 }
 
@@ -39,6 +39,7 @@ int main(int argc, char** argv) {
 	Mat img_gray_sharp(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_hull_black(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_hull_3(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+	Mat img_hull(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	
 	img_gray.copyTo(img_gray_temp);
 	vector<vector<Point> > contours;
@@ -180,7 +181,24 @@ int main(int argc, char** argv) {
 
 	/*for(int k=0;k<contours[pos].size();k++) {
 		cout<<hull[k]<<endl;
+
 	}*/
+
+		img_gray.copyTo(img_hull);
+
+		cout<<"print hull points ";
+		for(int kk=0;kk<hulls[1].size();kk++)
+		{
+			Point center(contours[size1-2][hulls[1][kk]]);
+			int radius =3;
+      		circle( img_hull, center, radius, Scalar(255,255,255), 3, 8, 0 );
+      		cout<<kk<<" ("<<center.x<<","<<center.y<<")"<<endl;
+      	}
+
+			namedWindow("img_hull",WINDOW_AUTOSIZE);
+        	imshow("img_hull",img_hull);
+
+
 		img_gray.copyTo(img_hull_black);
 		img_gray.copyTo(img_hull_3);
 
@@ -249,6 +267,7 @@ int main(int argc, char** argv) {
 		destroyWindow("Hull demo");
 		destroyWindow("img_hull_start");
 		destroyWindow("img_hull_end");
+		destroyWindow("img_hull");
 		destroyWindow("img_hull_defect");
 	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv");
 	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv_open");
