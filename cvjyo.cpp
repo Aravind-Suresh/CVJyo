@@ -10,6 +10,12 @@ void CannyThreshold(Mat src_gray, Mat& edge_gray, int lowThreshold, int highThre
 	Canny( edge_gray, edge_gray, lowThreshold, highThreshold, kernel_size );
 }
 
+bool comparatorContourAreas ( vector<Point> c1, vector<Point> c2 ) {
+	double i = fabs( contourArea(Mat(c1)) );
+	double j = fabs( contourArea(Mat(c2)) );
+	return ( i < j );
+}
+
 int main(int argc, char** argv) {
 	Mat img_gray = imread(argv[1], CV_LOAD_IMAGE_GRAYSCALE);
 	Mat img_gray_edge(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
@@ -22,7 +28,10 @@ int main(int argc, char** argv) {
 	Mat img_gray_bit_and_morph1_bit_and_inv(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_bit_and_morph1_bit_and_inv_temp(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_bit_and_morph1_bit_and_inv_open(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+	Mat img_gray_temp(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+	Mat img_gray_sharp(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 
+	img_gray.copyTo(img_gray_temp);
 	vector<vector<Point> > contours;
 	vector<int> arcl;
 	int pos,a;
@@ -94,7 +103,7 @@ int main(int argc, char** argv) {
 	namedWindow("img_gray_bit_and_morph1_bit_and_inv_temp", WINDOW_AUTOSIZE);
 	imshow("img_gray_bit_and_morph1_bit_and_inv_temp",img_gray_bit_and_morph1_bit_and_inv_temp);
 
-	findContours(img_gray_bit_and_morph1_bit_and_inv, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+	findContours(img_gray_bit_and_morph1_bit_and_inv, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 	Scalar color( 255, 0, 0 );
 	/*int idx = 0;
     for( ; idx >= 0; idx = hierarchy[idx][0] )
@@ -106,9 +115,8 @@ int main(int argc, char** argv) {
         /*drawContours( img_gray_bit_and_morph1_bit_and_inv, contours, 3, color, CV_FILLED, 8, hierarchy );
         namedWindow("img_gray_bit_and_morph1_bit_and_inv", WINDOW_AUTOSIZE);
         imshow("img_gray_bit_and_morph1_bit_and_inv",img_gray_bit_and_morph1_bit_and_inv);*/
-        findContours(img_gray,contours,3,color,CV_FILLED,8,hierarchy);
-        drawContours(img_gray_bit_and,contours,3,color,CV_FILLED,8,hierarchy);
-        for(int i = 0; i < contours.size(); i++) {
+
+        for(int i = 2; i < contours.size(); i++) {
         	//for(int j = 0; j < contours[i].size(); j++)
         		//cout<<contours[i][j]<<endl;
         	//cout<<endl;
@@ -121,21 +129,45 @@ int main(int argc, char** argv) {
         		a = arcl[i];
         		pos = i;
         	}
-        	cout<<a<<endl<<pos;
+        	//cout<<a<<endl<<pos;
         }
-        vector<int> hull(contours[pos].size());
+        
         vector<Vec4i> convexityDefectsSet;
-        convexHull(contours[pos], hull, false, false );
-        cout<<contours.size();
-        drawContours(img_gray,contours,-1, Scalar(255,0,0),CV_FILLED, 8);
-        namedWindow("img_gray_contour",WINDOW_AUTOSIZE);
-        imshow("img_gray_contour",img_gray);
+        sort(contours.begin(),contours.end(),comparatorContourAreas);
+        int size1 = contours.size();
+        
+        
+        vector<vector<int> >hulls( contours.size() );
+
+        convexHull(Mat(contours[size1-2]), hulls[1],false);
+        cout<<"PODA MOKKA NAAYE";
+        //Mat drawing(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+        Mat drawing = Mat::zeros( img_gray.size(), CV_8UC3 );
+        cout<<hulls[1].size()<<endl;
+        drawContours( drawing, hulls, -1, color, 1, 8);
+        namedWindow( "Hull demo", WINDOW_AUTOSIZE );
+        imshow( "Hull demo", drawing );
+
+       /* for(int id=0;id<5;id++) {
+        	drawContours(img_gray,contours,contours.size()-id-1, Scalar(50*id,50*id,50*id),CV_FILLED, 8);
+        	cout<<"contour drawn "<<id<<endl;
+        }*/
+        	cout<<"\nHERE SIZE"<<contours.size();
+        	//for(int jk=contours.size()-3;jk>0;jk--)
+        	{
+        		Scalar color( 0,0,0 );
+        		drawContours(img_gray,contours,contours.size()-2, color,2, 8, hierarchy);
+
+        	}
+        	
+        	namedWindow("img_gray_contour",WINDOW_AUTOSIZE);
+        	imshow("img_gray_contour",img_gray);
 
 	/*for(int k=0;k<contours[pos].size();k++) {
 		cout<<hull[k]<<endl;
 	}*/
-	//drawContours( drawing, hull, s, Scalar(0,255,255), 1, 8, vector<Vec4i>(), 0, Point() );
-		convexityDefects(contours[pos], hull, convexityDefectsSet);
+
+		convexityDefects(contours[pos], hulls[1], convexityDefectsSet);
 		for(int k=0;k<convexityDefectsSet.size();k++) {
 			int startIdx = convexityDefectsSet[k].val[0];
 			int endIdx = convexityDefectsSet[k].val[1];
@@ -154,6 +186,25 @@ int main(int argc, char** argv) {
 	//namedWindow("img_gray_bit_and_morph1_bit_and_inv_open", WINDOW_AUTOSIZE);
 	//imshow("img_gray_bit_and_morph1_bit_and_inv_open",img_gray_bit_and_morph1_bit_and_inv_open);
 
+
+		add(img_gray_edge, img_gray, img_gray_sharp, noArray(), -1);
+		namedWindow("img_gray_sharp", WINDOW_AUTOSIZE);
+		imshow("img_gray_sharp", img_gray_sharp);
+
+		GaussianBlur( img_gray_temp, img_gray_temp, Size(5, 5), 2, 1000 );
+		vector<Vec3f> circles;
+		for( size_t i = 0; i < circles.size(); i++ )
+		{
+			Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+			int radius = cvRound(circles[i][2]);
+      // circle center
+			circle( img_gray_temp, center, 3, Scalar(0,255,0), -1, 8, 0 );
+      // circle outline
+			circle( img_gray_temp, center, radius, Scalar(0,0,255), 3, 8, 0 );
+		}
+		namedWindow("img_gray_circles",WINDOW_AUTOSIZE);
+		imshow("img_gray_circles",img_gray_temp);
+
 		waitKey(0);
 
 		destroyWindow("img_gray");
@@ -163,8 +214,11 @@ int main(int argc, char** argv) {
 		destroyWindow("img_gray_bit_and_morph1");
 		destroyWindow("img_gray_bit_and_morph1_bit_and");
 		destroyWindow("img_gray_contour");
+		destroyWindow("img_gray_circles");
+		destroyWindow("img_gray_sharp");
+		destroyWindow("Hull demo");
 	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv");
 	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv_open");
 
-        	return 0;
-        }
+		return 0;
+	}
