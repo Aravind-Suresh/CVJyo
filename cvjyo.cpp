@@ -40,6 +40,10 @@ int main(int argc, char** argv) {
 	Mat img_hull_black(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_hull_3(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_hull(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+
+	Mat img_defects_1(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+	Mat img_defects_2(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+	Mat img_defects_3(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	
 	img_gray.copyTo(img_gray_temp);
 	vector<vector<Point> > contours;
@@ -218,9 +222,11 @@ int main(int argc, char** argv) {
 
 			Scalar color = Scalar( 0,0,0 );
 
+			if(k>=10) color = Scalar(255,255,255);
+
 			circle(img_gray_temp, contours[size1-2][defectPtIdx] , 10, color, 2, 8, 0 );
-			circle(img_hull_black, contours[size1-2][startIdx] , 10, Scalar(255,255,255), 2, 8, 0 );
-			circle(img_hull_3, contours[size1-2][endIdx] , 10, Scalar(255,255,255), 2, 8, 0 );
+			circle(img_hull_black, contours[size1-2][startIdx] , 10, color, 2, 8, 0 );
+			circle(img_hull_3, contours[size1-2][endIdx] , 10, color, 2, 8, 0 );
 
 			namedWindow("img_hull_defect",WINDOW_AUTOSIZE);
 			imshow("img_hull_defect", img_gray_temp);
