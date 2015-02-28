@@ -31,6 +31,7 @@ int main(int argc, char** argv) {
 	Mat img_gray_temp(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_sharp(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_hull_black(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+	Mat img_hull_3(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	
 	img_gray.copyTo(img_gray_temp);
 	vector<vector<Point> > contours;
@@ -91,6 +92,7 @@ int main(int argc, char** argv) {
 		Size( 2*dilation_size + 1, 2*dilation_size+1 ),
 		Point( dilation_size, dilation_size ) );
 	dilate( img_gray_bit_and_morph1, img_gray_bit_and_morph1, element );
+	//dilate( img_gray_bit_and_morph1, img_gray_bit_and_morph1, element );
 	namedWindow("img_gray_bit_and_morph1", WINDOW_AUTOSIZE);
 	imshow("img_gray_bit_and_morph1",img_gray_bit_and_morph1);
 
@@ -172,7 +174,9 @@ int main(int argc, char** argv) {
 	/*for(int k=0;k<contours[pos].size();k++) {
 		cout<<hull[k]<<endl;
 	}*/
-		img_gray_bit_and_morph1.copyTo(img_hull_black);
+		img_gray.copyTo(img_hull_black);
+		img_gray.copyTo(img_hull_3);
+
 		convexityDefects(contours[size1-2], hulls[1], convexityDefectsSet);
 		for(int k=0;k<convexityDefectsSet.size();k++) {
 			int startIdx = convexityDefectsSet[k].val[0];
@@ -180,15 +184,22 @@ int main(int argc, char** argv) {
 			int defectPtIdx = convexityDefectsSet[k].val[2];
 			double depth = static_cast<double>(convexityDefectsSet[k].val[3]) / 256.0;
 
+			cout<<endl<<k<<"  ";
+
 			cout << startIdx << ' ' << endIdx << ' ' << defectPtIdx << ' ' << depth << endl;
 
 			Scalar color = Scalar( 0,0,0 );
-			circle(img_gray_bit_and_morph1, contours[size1-2][startIdx] , 10, color, 2, 8, 0 );
+
+			circle(img_gray_temp, contours[size1-2][defectPtIdx] , 10, color, 2, 8, 0 );
 			circle(img_hull_black, contours[size1-2][startIdx] , 10, Scalar(255,255,255), 2, 8, 0 );
-			namedWindow("img_hull_2",WINDOW_AUTOSIZE);
-			imshow("img_hull_2", img_hull_black);
-			namedWindow("img_hull", WINDOW_AUTOSIZE);
-			imshow("img_hull",img_gray_bit_and_morph1);
+			circle(img_hull_3, contours[size1-2][endIdx] , 10, Scalar(255,255,255), 2, 8, 0 );
+
+			namedWindow("img_hull_defect",WINDOW_AUTOSIZE);
+			imshow("img_hull_defect", img_gray_temp);
+			namedWindow("img_hull_start", WINDOW_AUTOSIZE);
+			imshow("img_hull_start",img_hull_black);
+			namedWindow("img_hull_end", WINDOW_AUTOSIZE);
+			imshow("img_hull_end",img_hull_3);
 		}
 
 	//morphologyEx(img_gray_bit_and_morph1_bit_and_inv, img_gray_bit_and_morph1_bit_and_inv_open, MORPH_OPEN, kernelOpen, Point(-1,-1), 1, BORDER_CONSTANT);
@@ -199,7 +210,7 @@ int main(int argc, char** argv) {
 		add(img_gray_edge, img_gray, img_gray_sharp, noArray(), -1);
 		namedWindow("img_gray_sharp", WINDOW_AUTOSIZE);
 		imshow("img_gray_sharp", img_gray_sharp);
-
+/*
 		GaussianBlur( img_gray_temp, img_gray_temp, Size(5, 5), 2, 1000 );
 		vector<Vec3f> circles;
 		for( size_t i = 0; i < circles.size(); i++ )
@@ -213,7 +224,7 @@ int main(int argc, char** argv) {
 		}
 		namedWindow("img_gray_circles",WINDOW_AUTOSIZE);
 		imshow("img_gray_circles",img_gray_temp);
-
+*/
 		waitKey(0);
 
 		destroyWindow("img_gray");
@@ -223,10 +234,12 @@ int main(int argc, char** argv) {
 		destroyWindow("img_gray_bit_and_morph1");
 		destroyWindow("img_gray_bit_and_morph1_bit_and");
 		destroyWindow("img_gray_contour");
-		destroyWindow("img_gray_circles");
+		//destroyWindow("img_gray_circles");
 		destroyWindow("img_gray_sharp");
 		destroyWindow("Hull demo");
-		destroyWindow("img_hull_2");
+		destroyWindow("img_hull_start");
+		destroyWindow("img_hull_end");
+		destroyWindow("img_hull_defect");
 	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv");
 	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv_open");
 
