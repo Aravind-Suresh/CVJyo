@@ -11,6 +11,12 @@ void CannyThreshold(Mat src_gray, Mat& edge_gray, int lowThreshold, int highThre
 	Canny( edge_gray, edge_gray, lowThreshold, highThreshold, kernel_size );
 }
 
+bool checkPointInRegion(Mat src, float perx, float pery,Point p)
+{
+	//TODO : fill the function here
+
+}
+
 bool comparatorContourAreas ( vector<Point> c1, vector<Point> c2 ) {
 	double i = fabs( contourArea(Mat(c1)) );
 	double j = fabs( contourArea(Mat(c2)) );
@@ -195,18 +201,22 @@ int main(int argc, char** argv) {
 		{
 			Point center(contours[size1-2][hulls[1][kk]]);
 			int radius =3;
-      		circle( img_hull, center, radius, Scalar(255,255,255), 3, 8, 0 );
-      		cout<<kk<<" ("<<center.x<<","<<center.y<<")"<<endl;
-      	}
+			circle( img_hull, center, radius, Scalar(255,255,255), 3, 8, 0 );
+			cout<<kk<<" ("<<center.x<<","<<center.y<<")"<<endl;
+		}
 
-			namedWindow("img_hull",WINDOW_AUTOSIZE);
-        	imshow("img_hull",img_hull);
+		namedWindow("img_hull",WINDOW_AUTOSIZE);
+		imshow("img_hull",img_hull);
 
 
 		img_gray.copyTo(img_hull_black);
 		img_gray.copyTo(img_hull_3);
+		img_gray.copyTo(img_defects_1);
 
 		convexityDefects(contours[size1-2], hulls[1], convexityDefectsSet);
+
+		int filterThreshDepth = 13;
+		vector<Point> defectsPoints(convexityDefectsSet.size()-filterThreshDepth);
 
 		sort(convexityDefectsSet.begin(), convexityDefectsSet.end(), comparatorConvexityDefectsSetDepth);
 
@@ -222,7 +232,10 @@ int main(int argc, char** argv) {
 
 			Scalar color = Scalar( 0,0,0 );
 
-			if(k>=10) color = Scalar(255,255,255);
+			if(k>=filterThreshDepth) {
+				defectsPoints.push_back(contours[size1-2][defectPtIdx]);
+				color = Scalar(255,255,255);
+			}
 
 			circle(img_gray_temp, contours[size1-2][defectPtIdx] , 10, color, 2, 8, 0 );
 			circle(img_hull_black, contours[size1-2][startIdx] , 10, color, 2, 8, 0 );
@@ -235,6 +248,19 @@ int main(int argc, char** argv) {
 			namedWindow("img_hull_end", WINDOW_AUTOSIZE);
 			imshow("img_hull_end",img_hull_3);
 		}
+
+		/*Point2f minEncCirCenter;
+		float minEncRad;
+
+		minEnclosingCircle(defectsPoints, minEncCirCenter, minEncRad);
+		circle(img_defects_1, minEncCirCenter, minEncRad, Scalar(255,255,255), -1, 8, 0);*/
+
+		fillConvexPoly(img_defects_1, &defectsPoints[0], defectsPoints.size(), Scalar(255,255,255), 8);
+
+		//fillPoly(img_defects_1, defectsPointsArray, defectsPoints.size(), Scalar(255,255,255), 8);
+
+		namedWindow("img_defects_1", WINDOW_AUTOSIZE);
+		imshow("img_defects_1", img_defects_1);
 
 	//morphologyEx(img_gray_bit_and_morph1_bit_and_inv, img_gray_bit_and_morph1_bit_and_inv_open, MORPH_OPEN, kernelOpen, Point(-1,-1), 1, BORDER_CONSTANT);
 	//namedWindow("img_gray_bit_and_morph1_bit_and_inv_open", WINDOW_AUTOSIZE);
@@ -275,6 +301,7 @@ int main(int argc, char** argv) {
 		destroyWindow("img_hull_end");
 		destroyWindow("img_hull");
 		destroyWindow("img_hull_defect");
+		destroyWindow("img_defects_1");
 	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv");
 	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv_open");
 
