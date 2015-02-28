@@ -28,11 +28,11 @@ void binaryAbsDiff(Mat src1, Mat src2, Mat& res )
 {   for(int i=0;i<src1.rows;i++)
 	{	for(int j=0;j<src1.cols;j++)
 		{
-		if(src2.at<uchar> (i,j)>src1.at<uchar>(i,j))
-			res.at<uchar>(i,j)=255;
-		else
-			res.at<uchar>(i,j)=0;
-	     }
+			if(src2.at<uchar> (i,j)>src1.at<uchar>(i,j))
+				res.at<uchar>(i,j)=255;
+			else
+				res.at<uchar>(i,j)=0;
+		}
 	}
 }
 
@@ -85,8 +85,8 @@ int main(int argc, char** argv) {
 	Mat img_rgb = imread(argv[1], CV_LOAD_IMAGE_COLOR);
 	Mat img_hsv(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	cvtColor(img_rgb,img_hsv,CV_RGB2HSV);
-    namedWindow("win1", CV_WINDOW_AUTOSIZE);
-    imshow("win1", img_hsv);
+	namedWindow("win1", CV_WINDOW_AUTOSIZE);
+	imshow("win1", img_hsv);
 	Mat img_gray_edge(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_contours(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_edge_inv(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
@@ -146,22 +146,22 @@ int main(int argc, char** argv) {
 
 		namedWindow("img_gray",WINDOW_AUTOSIZE);
 		imshow("img_gray",img_gray);
-        
+
 
 
 		CannyThreshold(img_gray, img_gray_edge, lowThreshold, lowThreshold*ratio, kernel_size);
 		namedWindow("img_gray_edge", WINDOW_AUTOSIZE);
 		imshow("img_gray_edge",img_gray_edge);
-        
+
 		bitwise_not(img_gray_edge, img_gray_edge_inv);
 		namedWindow("img_gray_edge_inv", WINDOW_AUTOSIZE);
 		imshow("img_gray_edge_inv",img_gray_edge_inv);
-        double saturation = 10;
-double scale = 1;
+		double saturation = 10;
+		double scale = 1;
 
 // what it does here is dst = (uchar) ((double)src*scale+saturation); 
-img_gray.convertTo(saturated, CV_8UC1, scale, saturation); 
-namedWindow("img_gray_sat", WINDOW_AUTOSIZE);
+		img_gray.convertTo(saturated, CV_8UC1, scale, saturation); 
+		namedWindow("img_gray_sat", WINDOW_AUTOSIZE);
 		imshow("img_gray_sat", img_gray_sharp);
 	inRange(img_gray, 110, 255, img_skinmask);				//TODO : Make it adaptive
 	for(int x=0;x<img_skinmask.cols;x++) {
@@ -377,14 +377,20 @@ namedWindow("img_gray_sat", WINDOW_AUTOSIZE);
 		add(img_gray_edge, img_gray, img_gray_sharp, noArray(), -1);
 		namedWindow("img_gray_sharp", WINDOW_AUTOSIZE);
 		imshow("img_gray_sharp", img_gray_sharp);
-        binaryAbsDiff(img_gray_bit_and_morph1,img_defects_2,img_defects_3_bin);
+		binaryAbsDiff(img_gray_bit_and_morph1,img_defects_2,img_defects_3_bin);
 		
+		Mat element1 = getStructuringElement( dilation_type[0],
+			Size( 2*dilation_size + 1, 2*dilation_size+1 ),
+			Point( dilation_size, dilation_size ) );
+		dilate( img_defects_3_bin, img_defects_3_bin, element );
+
 		bitwise_not(img_defects_3_bin, img_defects_3_bin_inv);
 		bitwise_and(img_defects_3_bin_inv, img_defects_2, img_defects_4);
-		bitwise_and(img_defects_4, img_gray_temp3, img_gray_temp3);
+		//bitwise_and(img_defects_4, img_gray_temp3, img_gray_temp3);
+		bitwise_and(img_defects_4, img_gray_bit_and_morph1_bit_and, img_gray_temp3);
 
 		namedWindow("img_defects_3_bin",WINDOW_AUTOSIZE);
-		imshow("img_defects_3_bin",img_defects_3_bin_inv);
+		imshow("img_defects_3_bin",img_defects_3_bin);
 
 		namedWindow("final-filter-1", WINDOW_AUTOSIZE);
 		imshow("final-filter-1", img_gray_temp3);
