@@ -19,15 +19,15 @@ void CannyThreshold(Mat src_gray, Mat& edge_gray, int lowThreshold, int highThre
 int slopeStrLine(Point a, Point b)
 {
 	if(a.x-b.x)
-return (a.y-b.y)/(a.x-b.x);
+		return (a.y-b.y)/(a.x-b.x);
 
 }
 
 bool comparatorClockwise(Point a,Point b)
 {
-if(slopeStrLine(a,G_clockwiseRef)>slopeStrLine(b,G_clockwiseRef))
-	return true;
-else return false;
+	if(slopeStrLine(a,G_clockwiseRef)>slopeStrLine(b,G_clockwiseRef))
+		return true;
+	else return false;
 
 }
 
@@ -248,6 +248,7 @@ int main(int argc, char** argv) {
 		vector<Point> defectsPoints;
 
 		sort(convexityDefectsSet.begin(), convexityDefectsSet.end(), comparatorConvexityDefectsSetDepth);
+		int minposx=0;
 
 		for(int k=0;k<convexityDefectsSet.size();k++) {
 			int startIdx = convexityDefectsSet[k].val[0];
@@ -265,7 +266,7 @@ int main(int argc, char** argv) {
 
 			Point p = contours[size1-2][defectPtIdx];
 			if(k>=filterThreshDepth && checkPointInRegion(img_gray, toleranceFractionPointX, toleranceFractionPointY, p)) {
-				cout<<"Defect point : "<<k<<" ("<<p.x<<","<<p.y<<")";
+				//cout<<"Defect point : "<<k<<" ("<<p.x<<","<<p.y<<")";
 				defectsPoints.push_back(p);
 				color = Scalar(255,255,255);
 			}
@@ -275,27 +276,41 @@ int main(int argc, char** argv) {
 			circle(img_hull_black, contours[size1-2][startIdx] , 10, color, 2, 8, 0 );
 			circle(img_hull_3, contours[size1-2][endIdx] , 10, color, 2, 8, 0 );
 
-			namedWindow("img_hull_defect",WINDOW_AUTOSIZE);
-			imshow("img_hull_defect", img_gray_temp);
-			namedWindow("img_hull_start", WINDOW_AUTOSIZE);
-			imshow("img_hull_start",img_hull_black);
-			namedWindow("img_hull_end", WINDOW_AUTOSIZE);
-			imshow("img_hull_end",img_hull_3);
+			
 		}
-
+		namedWindow("img_hull_defect",WINDOW_AUTOSIZE);
+		imshow("img_hull_defect", img_gray_temp);
+		namedWindow("img_hull_start", WINDOW_AUTOSIZE);
+		imshow("img_hull_start",img_hull_black);
+		namedWindow("img_hull_end", WINDOW_AUTOSIZE);
+		imshow("img_hull_end",img_hull_3);
 		/*Point2f minEncCirCenter;
 		float minEncRad;
 
 		minEnclosingCircle(defectsPoints, minEncCirCenter, minEncRad);
 		circle(img_defects_1, minEncCirCenter, minEncRad, Scalar(255,255,255), -1, 8, 0);*/
 		cout<<"defects points size : "<<defectsPoints.size()<<endl;
+		
+		for(int k2=0;k2<defectsPoints.size();k2++) {
+			if(defectsPoints[k2].x<defectsPoints[minposx].x) {
+				minposx = k2;
+			}
+		}
 
+		G_clockwiseRef=defectsPoints[minposx];
 
-		G_clockwiseRef=defectsPoints[0];
+		cout<<"Defect point ref : "<<" ("<<G_clockwiseRef.x<<","<<G_clockwiseRef.y<<")"<<endl;
 
 		sort(defectsPoints.begin(),defectsPoints.end(),comparatorClockwise);
 
 		fillConvexPoly(img_defects_1, &defectsPoints[0], defectsPoints.size(), Scalar(255,255,255), 8);
+
+		for(int k1=0;k1<defectsPoints.size();k1++) {
+			Point p1 = defectsPoints[k1];
+			cout<<"Defect point : "<<k1<<" ("<<p1.x<<","<<p1.y<<")"<<endl;
+			cout<<"Slope : "<<slopeStrLine(p1,G_clockwiseRef);
+			line(img_defects_1, G_clockwiseRef, p1, Scalar(0,0,0), 1, 8, 0);
+		}
 
 		/*vector<vector<Point> > defectsPointsArray(1);
 		defectsPointsArray[0]=defectsPoints;
