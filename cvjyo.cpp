@@ -30,7 +30,8 @@ int main(int argc, char** argv) {
 	Mat img_gray_bit_and_morph1_bit_and_inv_open(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_temp(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_sharp(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-
+	Mat img_hull_black(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+	
 	img_gray.copyTo(img_gray_temp);
 	vector<vector<Point> > contours;
 	vector<int> arcl;
@@ -144,9 +145,14 @@ int main(int argc, char** argv) {
         //Mat drawing(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
         Mat drawing = Mat::zeros( img_gray.size(), CV_8UC3 );
         cout<<hulls[1].size()<<endl;
-        drawContours( drawing, hulls, -1, color, 1, 8);
+        /*drawContours( drawing, hulls, -1, color, 1, 8);
         namedWindow( "Hull demo", WINDOW_AUTOSIZE );
         imshow( "Hull demo", drawing );
+*/
+        for(int kk=0;kk<hulls[1].size();kk++) {
+        	cout<<hulls[1][kk]<<endl;
+        	
+        }
 
        /* for(int id=0;id<5;id++) {
         	drawContours(img_gray,contours,contours.size()-id-1, Scalar(50*id,50*id,50*id),CV_FILLED, 8);
@@ -166,8 +172,8 @@ int main(int argc, char** argv) {
 	/*for(int k=0;k<contours[pos].size();k++) {
 		cout<<hull[k]<<endl;
 	}*/
-
-		convexityDefects(contours[pos], hulls[1], convexityDefectsSet);
+		img_gray_bit_and_morph1.copyTo(img_hull_black);
+		convexityDefects(contours[size1-2], hulls[1], convexityDefectsSet);
 		for(int k=0;k<convexityDefectsSet.size();k++) {
 			int startIdx = convexityDefectsSet[k].val[0];
 			int endIdx = convexityDefectsSet[k].val[1];
@@ -176,8 +182,11 @@ int main(int argc, char** argv) {
 
 			cout << startIdx << ' ' << endIdx << ' ' << defectPtIdx << ' ' << depth << endl;
 
-			Scalar color = Scalar( 255,0,0 );
-			circle(img_gray_bit_and_morph1, contours[pos][startIdx] , 10, color, 2, 8, 0 );
+			Scalar color = Scalar( 0,0,0 );
+			circle(img_gray_bit_and_morph1, contours[size1-2][startIdx] , 10, color, 2, 8, 0 );
+			circle(img_hull_black, contours[size1-2][startIdx] , 10, Scalar(255,255,255), 2, 8, 0 );
+			namedWindow("img_hull_2",WINDOW_AUTOSIZE);
+			imshow("img_hull_2", img_hull_black);
 			namedWindow("img_hull", WINDOW_AUTOSIZE);
 			imshow("img_hull",img_gray_bit_and_morph1);
 		}
@@ -217,6 +226,7 @@ int main(int argc, char** argv) {
 		destroyWindow("img_gray_circles");
 		destroyWindow("img_gray_sharp");
 		destroyWindow("Hull demo");
+		destroyWindow("img_hull_2");
 	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv");
 	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv_open");
 
