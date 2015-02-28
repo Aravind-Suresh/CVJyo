@@ -7,7 +7,16 @@ using namespace std;
 
 Point G_clockwiseRef;
 
+/*vector<Scalar> colors;
+colors.push_back(Scalar(255,0,0));
+colors.push_back(Scalar(255,255,0));
+colors.push_back(Scalar(255,0,255));
+colors.push_back(Scalar(255,255,255));
+colors.push_back(Scalar(0,0,0));
+colors.push_back(Scalar(0,255,0));
+colors.push_back(Scalar(0,0,255));
 
+*/
 void CannyThreshold(Mat src_gray, Mat& edge_gray, int lowThreshold, int highThreshold, int kernel_size)
 {
 	blur( src_gray, edge_gray, Size(3,3) );
@@ -241,6 +250,8 @@ int main(int argc, char** argv) {
 		img_gray.copyTo(img_hull_black);
 		img_gray.copyTo(img_hull_3);
 		img_gray.copyTo(img_defects_1);
+		//img_gray.copyTo(img_defects_2);
+
 
 		convexityDefects(contours[size1-2], hulls[1], convexityDefectsSet);
 
@@ -283,13 +294,15 @@ int main(int argc, char** argv) {
 			imshow("img_hull_end",img_hull_3);
 		}
 
-		/*Point2f minEncCirCenter;
+		Point2f minEncCirCenter;
 		float minEncRad;
 
 		minEnclosingCircle(defectsPoints, minEncCirCenter, minEncRad);
-		circle(img_defects_1, minEncCirCenter, minEncRad, Scalar(255,255,255), -1, 8, 0);*/
+		circle(img_defects_2, minEncCirCenter, minEncRad, Scalar(255,255,255), -1, 8, 0);
 		cout<<"defects points size : "<<defectsPoints.size()<<endl;
 
+		namedWindow("img_defects_2", WINDOW_AUTOSIZE);
+		imshow("img_defects_2", img_defects_2);
 
 		G_clockwiseRef=defectsPoints[0];
 
@@ -345,6 +358,8 @@ int main(int argc, char** argv) {
 		destroyWindow("img_hull");
 		destroyWindow("img_hull_defect");
 		destroyWindow("img_defects_1");
+		destroyWindow("img_defects_2");
+
 	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv");
 	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv_open");
 
