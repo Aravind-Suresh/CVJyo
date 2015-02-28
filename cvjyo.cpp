@@ -19,8 +19,8 @@ colors.push_back(Scalar(0,0,255));
 */
 void CannyThreshold(Mat src_gray, Mat& edge_gray, int lowThreshold, int highThreshold, int kernel_size)
 {
-	blur( src_gray, edge_gray, Size(3,3) );
-	//GaussianBlur( src_gray, edge_gray, Size(5,5), 2, 2 );
+	//blur( src_gray, edge_gray, Size(3,3) );
+	GaussianBlur( src_gray, edge_gray, Size(5,5), 2, 2 );
 	Canny( edge_gray, edge_gray, lowThreshold, highThreshold, kernel_size );
 }
 
