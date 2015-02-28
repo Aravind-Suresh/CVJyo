@@ -4,12 +4,26 @@
 using namespace cv;
 using namespace std;
 
+
+Point G_clockwiseRef;
+
+/*vector<Scalar> colors;
+colors.push_back(Scalar(255,0,0));
+colors.push_back(Scalar(255,255,0));
+colors.push_back(Scalar(255,0,255));
+colors.push_back(Scalar(255,255,255));
+colors.push_back(Scalar(0,0,0));
+colors.push_back(Scalar(0,255,0));
+colors.push_back(Scalar(0,0,255));
+
+*/
 void CannyThreshold(Mat src_gray, Mat& edge_gray, int lowThreshold, int highThreshold, int kernel_size)
 {
 	blur( src_gray, edge_gray, Size(3,3) );
 	//GaussianBlur( src_gray, edge_gray, Size(5,5), 2, 2 );
 	Canny( edge_gray, edge_gray, lowThreshold, highThreshold, kernel_size );
 }
+<<<<<<< HEAD
 void binaryAbsDiff(Mat src1, Mat src2, Mat& res )
 {   for(int i=0;i<src1.rows;i++)
 	{	for(int j=0;j<src1.cols;j++)
@@ -21,10 +35,38 @@ void binaryAbsDiff(Mat src1, Mat src2, Mat& res )
 	     }
 	}
 }
+=======
+
+
+int slopeStrLine(Point a, Point b)
+{
+	if(a.x-b.x)
+return (a.y-b.y)/(a.x-b.x);
+
+}
+
+bool comparatorClockwise(Point a,Point b)
+{
+if(slopeStrLine(a,G_clockwiseRef)>slopeStrLine(b,G_clockwiseRef))
+	return true;
+else return false;
+
+}
+
+>>>>>>> 893703c06d725c0e71aea88ea20e4b01b1f198b3
 bool checkPointInRegion(Mat src, float perx, float pery,Point p)
 {
 	//TODO : fill the function here
+	int width = src.cols;
+	int height = src.rows;
+	int x1 = width*perx;
+	int x2 = width - x1;
+	int y1 = height*pery;
+	int y2 = height - y1;
 
+	if(p.x>x1 && p.x<x2 && p.y>y1 && p.y<y2)
+		return true;
+	else return false;
 }
 
 bool comparatorContourAreas ( vector<Point> c1, vector<Point> c2 ) {
@@ -237,11 +279,13 @@ namedWindow("img_gray_sat", WINDOW_AUTOSIZE);
 		img_gray.copyTo(img_hull_black);
 		img_gray.copyTo(img_hull_3);
 		img_gray.copyTo(img_defects_1);
+		//img_gray.copyTo(img_defects_2);
+
 
 		convexityDefects(contours[size1-2], hulls[1], convexityDefectsSet);
 
-		int filterThreshDepth = 13;
-		vector<Point> defectsPoints(convexityDefectsSet.size()-filterThreshDepth);
+		int filterThreshDepth = 10;
+		vector<Point> defectsPoints;
 
 		sort(convexityDefectsSet.begin(), convexityDefectsSet.end(), comparatorConvexityDefectsSetDepth);
 
@@ -256,11 +300,16 @@ namedWindow("img_gray_sat", WINDOW_AUTOSIZE);
 			cout << startIdx << ' ' << endIdx << ' ' << defectPtIdx << ' ' << depth << endl;
 
 			Scalar color = Scalar( 0,0,0 );
+			float toleranceFractionPointX = 0.05;
+			float toleranceFractionPointY = 0.05;
 
-			if(k>=filterThreshDepth) {
-				defectsPoints.push_back(contours[size1-2][defectPtIdx]);
+			Point p = contours[size1-2][defectPtIdx];
+			if(k>=filterThreshDepth && checkPointInRegion(img_gray, toleranceFractionPointX, toleranceFractionPointY, p)) {
+				cout<<"Defect point : "<<k<<" ("<<p.x<<","<<p.y<<")";
+				defectsPoints.push_back(p);
 				color = Scalar(255,255,255);
 			}
+
 
 			circle(img_gray_temp, contours[size1-2][defectPtIdx] , 10, color, 2, 8, 0 );
 			circle(img_hull_black, contours[size1-2][startIdx] , 10, color, 2, 8, 0 );
@@ -274,16 +323,27 @@ namedWindow("img_gray_sat", WINDOW_AUTOSIZE);
 			imshow("img_hull_end",img_hull_3);
 		}
 
-		/*Point2f minEncCirCenter;
+		Point2f minEncCirCenter;
 		float minEncRad;
 
 		minEnclosingCircle(defectsPoints, minEncCirCenter, minEncRad);
-		circle(img_defects_1, minEncCirCenter, minEncRad, Scalar(255,255,255), -1, 8, 0);*/
+		circle(img_defects_2, minEncCirCenter, minEncRad, Scalar(255,255,255), -1, 8, 0);
+		cout<<"defects points size : "<<defectsPoints.size()<<endl;
+
+		namedWindow("img_defects_2", WINDOW_AUTOSIZE);
+		imshow("img_defects_2", img_defects_2);
+
+		G_clockwiseRef=defectsPoints[0];
+
+		sort(defectsPoints.begin(),defectsPoints.end(),comparatorClockwise);
 
 		fillConvexPoly(img_defects_1, &defectsPoints[0], defectsPoints.size(), Scalar(255,255,255), 8);
 
-		//fillPoly(img_defects_1, defectsPointsArray, defectsPoints.size(), Scalar(255,255,255), 8);
+		/*vector<vector<Point> > defectsPointsArray(1);
+		defectsPointsArray[0]=defectsPoints;
 
+		fillPoly(img_defects_1, defectsPointsArray, defectsPoints.size(), Scalar(255,255,255), 8);
+*/
 		namedWindow("img_defects_1", WINDOW_AUTOSIZE);
 		imshow("img_defects_1", img_defects_1);
 
@@ -332,7 +392,12 @@ namedWindow("img_gray_sat", WINDOW_AUTOSIZE);
 		destroyWindow("img_hull");
 		destroyWindow("img_hull_defect");
 		destroyWindow("img_defects_1");
+<<<<<<< HEAD
 		destroyWindow("win1");
+=======
+		destroyWindow("img_defects_2");
+
+>>>>>>> 893703c06d725c0e71aea88ea20e4b01b1f198b3
 	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv");
 	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv_open");
 
