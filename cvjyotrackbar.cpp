@@ -7,6 +7,13 @@ using namespace std;
 
 Point G_clockwiseRef;
 
+float toleranceFractionPointX = 0.05;
+float toleranceFractionPointY = 0.05;
+int filterThreshDepth = 10;
+
+
+
+
 /*vector<Scalar> colors;
 colors.push_back(Scalar(255,0,0));
 colors.push_back(Scalar(255,255,0));
@@ -15,8 +22,10 @@ colors.push_back(Scalar(255,255,255));
 colors.push_back(Scalar(0,0,0));
 colors.push_back(Scalar(0,255,0));
 colors.push_back(Scalar(0,0,255));
-
 */
+
+
+
 void CannyThreshold(Mat src_gray, Mat& edge_gray, int lowThreshold, int highThreshold, int kernel_size)
 {
 	//blur( src_gray, edge_gray, Size(3,3) );
@@ -209,7 +218,7 @@ int main(int argc, char** argv) {
         namedWindow("img_gray_bit_and_morph1_bit_and_inv", WINDOW_AUTOSIZE);
         imshow("img_gray_bit_and_morph1_bit_and_inv",img_gray_bit_and_morph1_bit_and_inv);*/
 
-        for(int i = 2; i < contours.size(); i++) {
+ /*       for(int i = 2; i < contours.size(); i++) {
         	//for(int j = 0; j < contours[i].size(); j++)
         		//cout<<contours[i][j]<<endl;
         	//cout<<endl;
@@ -223,7 +232,7 @@ int main(int argc, char** argv) {
         		pos = i;
         	}
         	//cout<<a<<endl<<pos;
-        }
+        }*/
         
         vector<Vec4i> convexityDefectsSet;
         sort(contours.begin(),contours.end(),comparatorContourAreas);
@@ -289,7 +298,6 @@ int main(int argc, char** argv) {
 
 		convexityDefects(contours[size1-2], hulls[1], convexityDefectsSet);
 
-		int filterThreshDepth = 10;
 		vector<Point> defectsPoints;
 
 		sort(convexityDefectsSet.begin(), convexityDefectsSet.end(), comparatorConvexityDefectsSetDepth);
@@ -306,8 +314,6 @@ int main(int argc, char** argv) {
 			cout << startIdx << ' ' << endIdx << ' ' << defectPtIdx << ' ' << depth << endl;
 
 			Scalar color = Scalar( 0,0,0 );
-			float toleranceFractionPointX = 0.05;
-			float toleranceFractionPointY = 0.05;
 
 			Point p = contours[size1-2][defectPtIdx];
 			if(k>=filterThreshDepth && checkPointInRegion(img_gray, toleranceFractionPointX, toleranceFractionPointY, p)) {
@@ -379,7 +385,7 @@ int main(int argc, char** argv) {
 		imshow("img_gray_sharp", img_gray_sharp);
 
 
-		-->binaryAbsDiff(img_gray_bit_and_morph1,img_defects_2,img_defects_3_bin);
+		binaryAbsDiff(img_gray_bit_and_morph1,img_defects_2,img_defects_3_bin);
 		
 		Mat element1 = getStructuringElement( dilation_type[0],
 			Size( 2*dilation_size + 1, 2*dilation_size+1 ),
@@ -412,7 +418,10 @@ int main(int argc, char** argv) {
 		namedWindow("img_gray_circles",WINDOW_AUTOSIZE);
 		imshow("img_gray_circles",img_gray_temp);
 
-*/
+*/createTrackbar("filterThreshDepth","",&filterThreshDepth,)
+
+
+
 		
 		waitKey(0);
 
