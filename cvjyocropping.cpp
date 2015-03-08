@@ -99,46 +99,23 @@ bool comparatorConvexityDefectsSetDepth (Vec4i a, Vec4i b) {
 }
 
 int main(int argc, char** argv) {
+
+
+
 	Mat img_gray = imread(argv[1], CV_LOAD_IMAGE_GRAYSCALE);
 	Mat img_rgb = imread(argv[1], CV_LOAD_IMAGE_COLOR);
 	Mat img_hsv(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	cvtColor(img_rgb,img_hsv,CV_RGB2HSV);
 	namedWindow("win1", CV_WINDOW_AUTOSIZE);
 	imshow("win1", img_hsv);
-	Mat img_gray_edge(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-	Mat img_gray_contours(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-	Mat img_gray_edge_inv(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_skinmask(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-	Mat img_gray_bit_and(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_bit_and_morph1(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_bit_and_morph1_dil(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_bit_and_morph1_dil_temp(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-	Mat img_gray_bit_and_morph1_bit_and(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-	Mat img_gray_bit_and_morph1_bit_and_inv(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-	Mat img_gray_bit_and_morph1_bit_and_inv_temp(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-	Mat img_gray_bit_and_morph1_bit_andbit_and_inv_open(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-	Mat img_gray_temp(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-	Mat img_gray_sharp(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-	Mat img_hull_black(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-	Mat img_hull_3(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-	Mat img_hull(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-	Mat img_gray_temp3(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-	Mat img_defects_4(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-	Mat img_defects_5(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-	Mat img_defects_3_bin_inv(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-
-	Mat img_defects_1(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-	Mat img_defects_2(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-	Mat img_defects_3_bin(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+	Mat img_gray_bit_and(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat saturated(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-	img_gray.copyTo(img_gray_temp);
-	img_gray.copyTo(img_gray_temp3);
-	vector<vector<Point> > contours;
-	vector<int> arcl;
-	int pos,a;
-	vector<Vec4i> hierarchy;
-	vector<int> row(5,1);
-	vector<vector<int> > kernelOpen(5,row);
+	Mat img_gray_sharp(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+
 
 	/*
 		dilation_type
@@ -166,15 +143,6 @@ int main(int argc, char** argv) {
 		namedWindow("img_gray",WINDOW_AUTOSIZE);
 		imshow("img_gray",img_gray);
 
-
-
-		CannyThreshold(img_gray, img_gray_edge, lowThreshold, lowThreshold*ratio, kernel_size);
-		namedWindow("img_gray_edge", WINDOW_AUTOSIZE);
-		imshow("img_gray_edge",img_gray_edge);
-
-		bitwise_not(img_gray_edge, img_gray_edge_inv);
-		namedWindow("img_gray_edge_inv", WINDOW_AUTOSIZE);
-		imshow("img_gray_edge_inv",img_gray_edge_inv);
 		double saturation = 10;
 		double scale = 1;
 
@@ -182,6 +150,7 @@ int main(int argc, char** argv) {
 		img_gray.convertTo(saturated, CV_8UC1, scale, saturation); 
 		namedWindow("img_gray_sat", WINDOW_AUTOSIZE);
 		imshow("img_gray_sat", img_gray_sharp);
+
 	inRange(img_gray, 110, 255, img_skinmask);				//TODO : Make it adaptive
 	for(int x=0;x<img_skinmask.cols;x++) {
 		for(int y=0;y<10;y++) {
@@ -189,7 +158,7 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	bitwise_and(img_gray, img_gray, img_gray_bit_and, img_skinmask);
+	bitwise_and(img_gray, img_skinmask,img_gray_bit_and);
 	namedWindow("img_gray_bit_and", WINDOW_AUTOSIZE);
 	imshow("img_gray_bit_and",img_gray_bit_and);
 
@@ -234,28 +203,116 @@ int main(int argc, char** argv) {
 	namedWindow("img_gray_bit_and_morph1_dil", WINDOW_AUTOSIZE);
 	imshow("img_gray_bit_and_morph1_dil",img_gray_bit_and_morph1_dil);
 
-	bitwise_and(img_gray_bit_and_morph1, img_gray_edge_inv, img_gray_bit_and_morph1_bit_and);
-	namedWindow("img_gray_bit_and_morph1_bit_and", WINDOW_AUTOSIZE);
-	imshow("img_gray_bit_and_morph1_bit_and",img_gray_bit_and_morph1_bit_and);
 
-	bitwise_not(img_gray_bit_and_morph1_bit_and, img_gray_bit_and_morph1_bit_and_inv);
+	Mat img_cropped_edge(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_cropped_contours(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_cropped_edge_inv(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_skinmask_c(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_cropped_bit_and_c(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_cropped_bit_and_c_morph1_c(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_cropped_bit_and_c_morph1_c_bit_and(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_cropped_bit_and_c_morph1_c_bit_and_inv(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_cropped_bit_and_c_morph1_c_bit_and_inv_temp(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_cropped_bit_and_c_morph1_c_bit_andbit_and_inv_open(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_cropped_temp(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_cropped_sharp(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_hull_black(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_hull_3(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_hull(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_cropped_temp3(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_defects_4(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_defects_5(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_defects_3_bin_inv(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_cropped_bit_and_c_morph1_c_dil(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_cropped_bit_and_c_morph1_c_dil_temp(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	
 
-	img_gray_bit_and_morph1_bit_and_inv.copyTo(img_gray_bit_and_morph1_bit_and_inv_temp);
-	namedWindow("img_gray_bit_and_morph1_bit_and_inv_temp", WINDOW_AUTOSIZE);
-	imshow("img_gray_bit_and_morph1_bit_and_inv_temp",img_gray_bit_and_morph1_bit_and_inv_temp);
 
-	findContours(img_gray_bit_and_morph1_bit_and_inv, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+	Mat img_defects_1(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_defects_2(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_defects_3_bin(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+//Mat saturated(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	img_cropped.copyTo(img_cropped_temp);
+	img_cropped.copyTo(img_cropped_temp3);
+	vector<vector<Point> > contours;
+	vector<int> arcl;
+	int pos,a;
+	vector<Vec4i> hierarchy;
+	vector<int> row(5,1);
+	vector<vector<int> > kernelOpen(5,row);
+
+	/*
+		dilation_type
+
+		MORPH_RECT = 0,
+		MORPH_CROSS = 1,
+		MORPH_ELLIPSE = 2
+
+	*/
+		
+		CannyThreshold(img_cropped, img_cropped_edge, lowThreshold, lowThreshold*ratio, kernel_size);
+		namedWindow("img_cropped_edge", WINDOW_AUTOSIZE);
+		imshow("img_cropped_edge",img_cropped_edge);
+
+		bitwise_not(img_cropped_edge, img_cropped_edge_inv);
+		namedWindow("img_cropped_edge_inv", WINDOW_AUTOSIZE);
+		imshow("img_cropped_edge_inv",img_cropped_edge_inv);
+
+
+/*// what it does here is dst = (uchar) ((double)src*scale+saturation); 
+		img_cropped.convertTo(saturated, CV_8UC1, scale, saturation); 
+		namedWindow("img_cropped_sat", WINDOW_AUTOSIZE);
+		imshow("img_cropped_sat", img_cropped_sharp);*/
+
+	inRange(img_cropped, 110, 255, img_skinmask_c);				//TODO : Make it adaptive
+	for(int x=0;x<img_skinmask_c.cols;x++) {
+		for(int y=0;y<10;y++) {
+			img_skinmask_c.at<uchar>(y,x) = 0;
+		}
+	}
+
+	bitwise_and(img_cropped, img_cropped, img_cropped_bit_and_c, img_skinmask_c);
+	namedWindow("img_cropped_bit_and_c", WINDOW_AUTOSIZE);
+	imshow("img_cropped_bit_and_c",img_cropped_bit_and_c);
+
+	//Some morphological operations -- dilate on(binary+otsu on img_cropped_bit_and_c)
+
+	threshold(img_cropped_bit_and_c, img_cropped_bit_and_c_morph1_c, 0, 255, THRESH_BINARY + THRESH_OTSU);
+
+
+	dilate( img_cropped_bit_and_c_morph1_c, img_cropped_bit_and_c_morph1_c, element );
+	dilate( img_cropped_bit_and_c_morph1_c, img_cropped_bit_and_c_morph1_c_dil, element );
+
+	namedWindow("img_cropped_bit_and_c_morph1_c", WINDOW_AUTOSIZE);
+	imshow("img_cropped_bit_and_c_morph1_c",img_cropped_bit_and_c_morph1_c);
+
+	
+	namedWindow("img_cropped_bit_and_c_morph1_c_dil", WINDOW_AUTOSIZE);
+	imshow("img_cropped_bit_and_c_morph1_c_dil",img_cropped_bit_and_c_morph1_c_dil);
+
+
+	bitwise_and(img_cropped_bit_and_c_morph1_c, img_cropped_edge_inv, img_cropped_bit_and_c_morph1_c_bit_and);
+	namedWindow("img_cropped_bit_and_c_morph1_c_bit_and", WINDOW_AUTOSIZE);
+	imshow("img_cropped_bit_and_c_morph1_c_bit_and",img_cropped_bit_and_c_morph1_c_bit_and);
+
+	bitwise_not(img_cropped_bit_and_c_morph1_c_bit_and, img_cropped_bit_and_c_morph1_c_bit_and_inv);
+
+	img_cropped_bit_and_c_morph1_c_bit_and_inv.copyTo(img_cropped_bit_and_c_morph1_c_bit_and_inv_temp);
+	namedWindow("img_cropped_bit_and_c_morph1_c_bit_and_inv_temp", WINDOW_AUTOSIZE);
+	imshow("img_cropped_bit_and_c_morph1_c_bit_and_inv_temp",img_cropped_bit_and_c_morph1_c_bit_and_inv_temp);
+
+	findContours(img_cropped_bit_and_c_morph1_c_bit_and_inv, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 	Scalar color( 255, 0, 0 );
 	/*int idx = 0;
     for( ; idx >= 0; idx = hierarchy[idx][0] )
     {
         Scalar color( rand()&255, rand()&255, rand()&255 );
-        drawContours( img_gray_bit_and_morph1_bit_and_inv, contours, idx, color, CV_FILLED, 8, hierarchy );
+        drawContours( img_cropped_bit_and_c_morph1_c_bit_and_inv, contours, idx, color, CV_FILLED, 8, hierarchy );
     }*/
 
-        /*drawContours( img_gray_bit_and_morph1_bit_and_inv, contours, 3, color, CV_FILLED, 8, hierarchy );
-        namedWindow("img_gray_bit_and_morph1_bit_and_inv", WINDOW_AUTOSIZE);
-        imshow("img_gray_bit_and_morph1_bit_and_inv",img_gray_bit_and_morph1_bit_and_inv);*/
+        /*drawContours( img_cropped_bit_and_c_morph1_c_bit_and_inv, contours, 3, color, CV_FILLED, 8, hierarchy );
+        namedWindow("img_cropped_bit_and_c_morph1_c_bit_and_inv", WINDOW_AUTOSIZE);
+        imshow("img_cropped_bit_and_c_morph1_c_bit_and_inv",img_cropped_bit_and_c_morph1_c_bit_and_inv);*/
 
  /*       for(int i = 2; i < contours.size(); i++) {
         	//for(int j = 0; j < contours[i].size(); j++)
@@ -282,8 +339,8 @@ int main(int argc, char** argv) {
 
         convexHull(Mat(contours[size1-2]), hulls[1],false);
         //cout<<"PODA MOKKA NAAYE"<<endl;
-        //Mat drawing(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-        Mat drawing = Mat::zeros( img_gray.size(), CV_8UC3 );
+        //Mat drawing(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+        Mat drawing = Mat::zeros( img_cropped.size(), CV_8UC3 );
         cout<<hulls[1].size()<<endl;
         /*drawContours( drawing, hulls, -1, color, 1, 8);
         namedWindow( "Hull demo", WINDOW_AUTOSIZE );
@@ -295,26 +352,26 @@ int main(int argc, char** argv) {
         }
 
        /* for(int id=0;id<5;id++) {
-        	drawContours(img_gray,contours,contours.size()-id-1, Scalar(50*id,50*id,50*id),CV_FILLED, 8);
+        	drawContours(img_cropped,contours,contours.size()-id-1, Scalar(50*id,50*id,50*id),CV_FILLED, 8);
         	cout<<"contour drawn "<<id<<endl;
         }*/
         	cout<<"\nHERE SIZE"<<contours.size()<<endl;
         	//for(int jk=contours.size()-3;jk>0;jk--)
         	{
         		Scalar color( 0,0,0 );
-        		drawContours(img_gray,contours,contours.size()-2, color,2, 8, hierarchy);
+        		drawContours(img_cropped,contours,contours.size()-2, color,2, 8, hierarchy);
 
         	}
         	
-        	namedWindow("img_gray_contour",WINDOW_AUTOSIZE);
-        	imshow("img_gray_contour",img_gray);
+        	namedWindow("img_cropped_contour",WINDOW_AUTOSIZE);
+        	imshow("img_cropped_contour",img_cropped);
 
 	/*for(int k=0;k<contours[pos].size();k++) {
 		cout<<hull[k]<<endl;
 
 	}*/
 
-		img_gray.copyTo(img_hull);
+		img_cropped.copyTo(img_hull);
 
 		cout<<"\nprint hull points ";
 		for(int kk=0;kk<hulls[1].size();kk++)
@@ -329,10 +386,10 @@ int main(int argc, char** argv) {
 		imshow("img_hull",img_hull);
 
 
-		img_gray.copyTo(img_hull_black);
-		img_gray.copyTo(img_hull_3);
-		img_gray.copyTo(img_defects_1);
-		//img_gray.copyTo(img_defects_2);
+		img_cropped.copyTo(img_hull_black);
+		img_cropped.copyTo(img_hull_3);
+		img_cropped.copyTo(img_defects_1);
+		//img_cropped.copyTo(img_defects_2);
 
 
 		convexityDefects(contours[size1-2], hulls[1], convexityDefectsSet);
@@ -355,21 +412,21 @@ int main(int argc, char** argv) {
 			Scalar color = Scalar( 0,0,0 );
 
 			Point p = contours[size1-2][defectPtIdx];
-			if(k>=filterThreshDepth && checkPointInRegion(img_gray, toleranceFractionPointX, toleranceFractionPointY, p)) {
+			if(k>=filterThreshDepth && checkPointInRegion(img_cropped, toleranceFractionPointX, toleranceFractionPointY, p)) {
 				//cout<<"Defect point : "<<k<<" ("<<p.x<<","<<p.y<<")";
 				defectsPoints.push_back(p);
 				color = Scalar(255,255,255);
 			}
 
 
-			circle(img_gray_temp, contours[size1-2][defectPtIdx] , 10, color, 2, 8, 0 );
+			circle(img_cropped_temp, contours[size1-2][defectPtIdx] , 10, color, 2, 8, 0 );
 			circle(img_hull_black, contours[size1-2][startIdx] , 10, color, 2, 8, 0 );
 			circle(img_hull_3, contours[size1-2][endIdx] , 10, color, 2, 8, 0 );
 
 			
 		}
 		namedWindow("img_hull_defect",WINDOW_AUTOSIZE);
-		imshow("img_hull_defect", img_gray_temp);
+		imshow("img_hull_defect", img_cropped_temp);
 		namedWindow("img_hull_start", WINDOW_AUTOSIZE);
 		imshow("img_hull_start",img_hull_black);
 		namedWindow("img_hull_end", WINDOW_AUTOSIZE);
@@ -414,17 +471,17 @@ int main(int argc, char** argv) {
 		namedWindow("img_defects_1", WINDOW_AUTOSIZE);
 		imshow("img_defects_1", img_defects_1);
 
-	//morphologyEx(img_gray_bit_and_morph1_bit_and_inv, img_gray_bit_and_morph1_bit_and_inv_open, MORPH_OPEN, kernelOpen, Point(-1,-1), 1, BORDER_CONSTANT);
-	//namedWindow("img_gray_bit_and_morph1_bit_and_inv_open", WINDOW_AUTOSIZE);
-	//imshow("img_gray_bit_and_morph1_bit_and_inv_open",img_gray_bit_and_morph1_bit_and_inv_open);
+	//morphologyEx(img_cropped_bit_and_c_morph1_c_bit_and_inv, img_cropped_bit_and_c_morph1_c_bit_and_inv_open, MORPH_OPEN, kernelOpen, Point(-1,-1), 1, BORDER_CONSTANT);
+	//namedWindow("img_cropped_bit_and_c_morph1_c_bit_and_inv_open", WINDOW_AUTOSIZE);
+	//imshow("img_cropped_bit_and_c_morph1_c_bit_and_inv_open",img_cropped_bit_and_c_morph1_c_bit_and_inv_open);
 
 
-		add(img_gray_edge, img_gray, img_gray_sharp, noArray(), -1);
-		namedWindow("img_gray_sharp", WINDOW_AUTOSIZE);
-		imshow("img_gray_sharp", img_gray_sharp);
+		add(img_cropped_edge, img_cropped, img_cropped_sharp, noArray(), -1);
+		namedWindow("img_cropped_sharp", WINDOW_AUTOSIZE);
+		imshow("img_cropped_sharp", img_cropped_sharp);
 
 
-		binaryAbsDiff(img_gray_bit_and_morph1,img_defects_2,img_defects_3_bin);
+		binaryAbsDiff(img_cropped_bit_and_c_morph1_c,img_defects_2,img_defects_3_bin);
 		
 		Mat element1 = getStructuringElement( dilation_type[0],
 			Size( 2*dilation_size + 1, 2*dilation_size+1 ),
@@ -433,29 +490,29 @@ int main(int argc, char** argv) {
 
 		bitwise_not(img_defects_3_bin, img_defects_3_bin_inv);
 		bitwise_and(img_defects_3_bin_inv, img_defects_2, img_defects_4);
-		//bitwise_and(img_defects_4, img_gray_temp3, img_gray_temp3);
-		bitwise_and(img_defects_4, img_gray_bit_and_morph1_bit_and, img_gray_temp3);
+		//bitwise_and(img_defects_4, img_cropped_temp3, img_cropped_temp3);
+		bitwise_and(img_defects_4, img_cropped_bit_and_c_morph1_c_bit_and, img_cropped_temp3);
 
 		namedWindow("img_defects_3_bin",WINDOW_AUTOSIZE);
 		imshow("img_defects_3_bin",img_defects_3_bin);
 
 		namedWindow("final-filter-1", WINDOW_AUTOSIZE);
-		imshow("final-filter-1", img_gray_temp3);
+		imshow("final-filter-1", img_cropped_temp3);
 
 /*      
-		GaussianBlur( img_gray_temp, img_gray_temp, Size(5, 5), 2, 1000 );
+		GaussianBlur( img_cropped_temp, img_cropped_temp, Size(5, 5), 2, 1000 );
 		vector<Vec3f> circles;
 		for( size_t i = 0; i < circles.size(); i++ )
 		{
 			Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
 			int radius = cvRound(circles[i][2]);
       // circle center
-			circle( img_gray_temp, center, 3, Scalar(0,255,0), -1, 8, 0 );
+			circle( img_cropped_temp, center, 3, Scalar(0,255,0), -1, 8, 0 );
       // circle outline
-			circle( img_gray_temp, center, radius, Scalar(0,0,255), 3, 8, 0 );
+			circle( img_cropped_temp, center, radius, Scalar(0,0,255), 3, 8, 0 );
 		}
-		namedWindow("img_gray_circles",WINDOW_AUTOSIZE);
-		imshow("img_gray_circles",img_gray_temp);
+		namedWindow("img_cropped_circles",WINDOW_AUTOSIZE);
+		imshow("img_cropped_circles",img_cropped_temp);
 
 */
 		//createTrackbar("filterThreshDepth","",&filterThreshDepth,);
@@ -465,18 +522,18 @@ int main(int argc, char** argv) {
 		
 		waitKey(0);
 
-		destroyWindow("img_gray");
-		destroyWindow("img_gray_edge");
-		destroyWindow("img_gray_edge_inv");
-		destroyWindow("img_gray_bit_and");
-		destroyWindow("img_gray_bit_and_morph1");
-		destroyWindow("img_gray_bit_and_morph1_dil");
-		destroyWindow("img_gray_bit_and_morph1_bit_and");
-		destroyWindow("img_gray_contour");
-		//destroyWindow("img_gray_circles");
-		destroyWindow("img_gray_sharp");
+		destroyWindow("img_cropped");
+		destroyWindow("img_cropped_edge");
+		destroyWindow("img_cropped_edge_inv");
+		destroyWindow("img_cropped_bit_and_c");
+		destroyWindow("img_cropped_bit_and_c_morph1_c");
+		destroyWindow("img_cropped_bit_and_c_morph1_c_dil");
+		destroyWindow("img_cropped_bit_and_c_morph1_c_bit_and");
+		destroyWindow("img_cropped_contour");
+		//destroyWindow("img_cropped_circles");
+		destroyWindow("img_cropped_sharp");
 		destroyWindow("Hull demo");
-		destroyWindow("img_gray_sat");
+		destroyWindow("img_cropped_sat");
 		destroyWindow("img_hull_start");
 		destroyWindow("img_hull_end");
 		destroyWindow("img_hull");
@@ -487,8 +544,8 @@ int main(int argc, char** argv) {
 		destroyWindow("img_defects_3_bin");
 		destroyWindow("final-filter-1");
 		destroyWindow("img_cropped");
-	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv");
-	//destroyWindow("img_gray_bit_and_morph1_bit_and_inv_open");
+	//destroyWindow("img_cropped_bit_and_c_morph1_c_bit_and_inv");
+	//destroyWindow("img_cropped_bit_and_c_morph1_c_bit_and_inv_open");
 
 		return 0;
 	}
