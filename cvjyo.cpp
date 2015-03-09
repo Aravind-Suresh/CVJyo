@@ -379,7 +379,7 @@ int main(int argc, char** argv) {
 		imshow("img_gray_sharp", img_gray_sharp);
 
 
-		-->binaryAbsDiff(img_gray_bit_and_morph1,img_defects_2,img_defects_3_bin);
+		binaryAbsDiff(img_gray_bit_and_morph1,img_defects_2,img_defects_3_bin);
 		
 		Mat element1 = getStructuringElement( dilation_type[0],
 			Size( 2*dilation_size + 1, 2*dilation_size+1 ),
