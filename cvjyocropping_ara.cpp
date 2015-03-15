@@ -7,8 +7,8 @@ using namespace std;
 
 Point G_clockwiseRef;
 
-float toleranceFractionPointX = 0.05;
-float toleranceFractionPointY = 0.05;
+float toleranceFractionPointX = 0.2;
+float toleranceFractionPointY = 0.2;
 int filterThreshDepth = 10;
 
 
@@ -24,6 +24,17 @@ colors.push_back(Scalar(0,255,0));
 colors.push_back(Scalar(0,0,255));
 */
 
+/*void hsv2gray(Mat skin_mask,Mat* gray)
+{
+for(int i=0;i<skin_mask.rows;i++)
+	{	for(int j=0;j<skin_mask.cols;j++)
+		{
+			if(skin_mask.at<Vec3b>(i,j)==0)
+				(*gray).at<uchar>(i,j)=0;
+		}
+	}
+}
+*/
 
 
 void CannyThreshold(Mat src_gray, Mat& edge_gray, int lowThreshold, int highThreshold, int kernel_size)
@@ -109,13 +120,16 @@ int main(int argc, char** argv) {
 	namedWindow("win1", CV_WINDOW_AUTOSIZE);
 	imshow("win1", img_hsv);
 	Mat img_skinmask(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+	Mat img_skinmask_hsv(img_gray.rows, img_gray.cols, CV_32F,Scalar::all(0));
+	Mat img_skinmask_hsv2rgb(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+	Mat img_skinmask_hsv2rgb2gray(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_bit_and_morph1(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_bit_and_morph1_dil(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_bit_and_morph1_dil_temp(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_bit_and(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+	Mat img_gray_bit_and_2(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat saturated(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_sharp(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-
 
 	/*
 		dilation_type
@@ -151,7 +165,14 @@ int main(int argc, char** argv) {
 		namedWindow("img_gray_sat", WINDOW_AUTOSIZE);
 		imshow("img_gray_sat", img_gray_sharp);
 
-	inRange(img_gray, 110, 255, img_skinmask);				//TODO : Make it adaptive
+//H-0 and 50, in the channel S from 0.23 to 0.68
+	inRange(img_hsv,Scalar(0,0.23,100),Scalar(50,0.68,200), img_skinmask_hsv);
+	//hsv2gray(img_skinmask_hsv,&img_skinmask_hsv2rgb2gray);
+	//cvtColor(img_skinmask_hsv,img_skinmask_hsv2rgb,CV_HSV2RGB);
+	// cvtColor(img_skinmask_hsv2rgb,img_skinmask_hsv2rgb2gray,CV_RGB2GRAY);
+
+
+	inRange(img_gray, 110,255, img_skinmask);				//TODO : Make it adaptive
 	for(int x=0;x<img_skinmask.cols;x++) {
 		for(int y=0;y<10;y++) {
 			img_skinmask.at<uchar>(y,x) = 0;
@@ -162,9 +183,20 @@ int main(int argc, char** argv) {
 	namedWindow("img_gray_bit_and", WINDOW_AUTOSIZE);
 	imshow("img_gray_bit_and",img_gray_bit_and);
 
+	/*
+
+	bitwise_and(img_gray, img_skinmask_hsv2rgb2gray,img_gray_bit_and_2);
+	namedWindow("img_gray_bit_and_2", WINDOW_AUTOSIZE);
+	imshow("img_gray_bit_and_2",img_gray_bit_and_2);
+*/
+
 	//Some morphological operations -- dilate on(binary+otsu on img_gray_bit_and)
 
 	threshold(img_gray_bit_and, img_gray_bit_and_morph1, 0, 255, THRESH_BINARY + THRESH_OTSU);
+	//ADAPTIVE_THRESH_MEAN_C or ADAPTIVE_THRESH_GAUSSIAN_C
+	//adaptiveThreshold(img_gray_bit_and, img_gray_bit_and_morph1, 255,ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 5,0);
+
+
 
 	Mat element = getStructuringElement( dilation_type[0],
 		Size( 2*dilation_size + 1, 2*dilation_size+1 ),
@@ -222,10 +254,11 @@ int main(int argc, char** argv) {
 	Mat img_cropped_temp3(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
 	Mat img_defects_4(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
 	Mat img_defects_5(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
-	Mat img_defects_3_bin_inv(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_defects_3_bin_inv(img_cropped.rows,img_cropped.cols, CV_8UC1, Scalar::all(0));
 	Mat img_cropped_bit_and_c_morph1_c_dil(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
 	Mat img_cropped_bit_and_c_morph1_c_dil_temp(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
-	
+	Mat img_cropped_temp3_open(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+
 
 
 	Mat img_defects_1(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
@@ -278,6 +311,8 @@ int main(int argc, char** argv) {
 	//Some morphological operations -- dilate on(binary+otsu on img_cropped_bit_and_c)
 
 	threshold(img_cropped_bit_and_c, img_cropped_bit_and_c_morph1_c, 0, 255, THRESH_BINARY + THRESH_OTSU);
+	//adaptiveThreshold(img_cropped_bit_and_c, img_cropped_bit_and_c_morph1_c, 255,ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY,5,0);
+
 
 
 	dilate( img_cropped_bit_and_c_morph1_c, img_cropped_bit_and_c_morph1_c, element );
@@ -412,7 +447,7 @@ int main(int argc, char** argv) {
 			Scalar color = Scalar( 0,0,0 );
 
 			Point p = contours[size1-2][defectPtIdx];
-			if(k>=filterThreshDepth && checkPointInRegion(img_cropped, toleranceFractionPointX, toleranceFractionPointY, p)) {
+			if(/*k>=filterThreshDepth && */checkPointInRegion(img_cropped, toleranceFractionPointX, toleranceFractionPointY, p)) {
 				//cout<<"Defect point : "<<k<<" ("<<p.x<<","<<p.y<<")";
 				defectsPoints.push_back(p);
 				color = Scalar(255,255,255);
@@ -435,6 +470,7 @@ int main(int argc, char** argv) {
 		Point2f minEncCirCenter;
 
 		float minEncRad;
+		cout<<"defects points size : "<<defectsPoints.size()<<endl;
 
 		minEnclosingCircle(defectsPoints, minEncCirCenter, minEncRad);
 		circle(img_defects_2, minEncCirCenter, minEncRad, Scalar(255,255,255), -1, 8, 0);
@@ -456,7 +492,8 @@ int main(int argc, char** argv) {
 
 		fillConvexPoly(img_defects_1, &defectsPoints[0], defectsPoints.size(), Scalar(255,255,255), 8);
 
-		for(int k1=0;k1<defectsPoints.size();k1++) {
+		for(int k1=0;k1<defectsPoints.size();k1++) 
+		{
 			Point p1 = defectsPoints[k1];
 			cout<<"Defect point : "<<k1<<" ("<<p1.x<<","<<p1.y<<")"<<endl;
 			cout<<"Slope : "<<slopeStrLine(p1,G_clockwiseRef);
@@ -492,12 +529,20 @@ int main(int argc, char** argv) {
 		bitwise_and(img_defects_3_bin_inv, img_defects_2, img_defects_4);
 		//bitwise_and(img_defects_4, img_cropped_temp3, img_cropped_temp3);
 		bitwise_and(img_defects_4, img_cropped_bit_and_c_morph1_c_bit_and, img_cropped_temp3);
+		/*erode( img_cropped_temp3, img_cropped_temp3 , element );
+		dilate( img_cropped_temp3, img_cropped_temp3 , element );*/
+		//morphologyEx(img_cropped_temp3, img_cropped_temp3_open, OPEN, kernelOpen, Point(-1,-1), 1, BORDER_CONSTANT);
+		//Laplacian( const oclMat& src, oclMat& dst, int ddepth, int ksize=1, double scale=1, double delta=0, int borderType=BORDER_DEFAULT )
+
 
 		namedWindow("img_defects_3_bin",WINDOW_AUTOSIZE);
 		imshow("img_defects_3_bin",img_defects_3_bin);
 
 		namedWindow("final-filter-1", WINDOW_AUTOSIZE);
 		imshow("final-filter-1", img_cropped_temp3);
+
+		namedWindow("final-filter-1_open", WINDOW_AUTOSIZE);
+		imshow("final-filter-1_open", img_cropped_temp3_open);
 
 /*      
 		GaussianBlur( img_cropped_temp, img_cropped_temp, Size(5, 5), 2, 1000 );
