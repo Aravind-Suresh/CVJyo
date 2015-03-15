@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
 	GaussianBlur( img_gray, img_gray, Size(5, 5), 2, 100);
 
 	threshold(img_gray, img_gray_thresh, 0, 255, THRESH_BINARY + THRESH_OTSU);
-	bitwise_not(img_gray_thresh, img_gray_thresh);
+	//bitwise_not(img_gray_thresh, img_gray_thresh);
 	namedWindow("thresh", WINDOW_AUTOSIZE);
 	imshow("thresh", img_gray_thresh);
 

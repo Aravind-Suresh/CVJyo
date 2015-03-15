@@ -50,7 +50,7 @@ void cropHand(Mat src, Mat* result, int max_x, int min_x, int max_y, int min_y)
 {cout<<"cropHand called";
 for (int i=min_y;i<max_y;i++)
 	for(int j=min_x;j<max_x;j++)
-(*result).at<uchar>(i-min_y,j-min_x)=src.at<uchar>(i,j);
+		(*result).at<uchar>(i-min_y,j-min_x)=src.at<uchar>(i,j);
 
 }
 
@@ -181,7 +181,7 @@ int main(int argc, char** argv) {
 	vector<vector<Point> > contours_minMax;
 	img_gray_bit_and_morph1_dil.copyTo(img_gray_bit_and_morph1_dil_temp);	
 	findContours(img_gray_bit_and_morph1_dil_temp, contours_minMax, hierarchy_minMax, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
-    sort(contours_minMax.begin(),contours_minMax.end(),comparatorContourAreas);
+	sort(contours_minMax.begin(),contours_minMax.end(),comparatorContourAreas);
     // cout<<"\ncontours_minMax size"<<contours_minMax.size();
 	drawContours(img_gray_bit_and_morph1_dil,contours_minMax,contours_minMax.size()-1,Scalar(125,125,125),3,8,hierarchy_minMax);
 
@@ -329,19 +329,19 @@ int main(int argc, char** argv) {
         	}
         	//cout<<a<<endl<<pos;
         }*/
-        
-        vector<Vec4i> convexityDefectsSet;
-        sort(contours.begin(),contours.end(),comparatorContourAreas);
-        int size1 = contours.size();
-        
-        
-        vector<vector<int> >hulls( contours.size() );
 
-        convexHull(Mat(contours[size1-2]), hulls[1],false);
+        	vector<Vec4i> convexityDefectsSet;
+        	sort(contours.begin(),contours.end(),comparatorContourAreas);
+        	int size1 = contours.size();
+
+
+        	vector<vector<int> >hulls( contours.size() );
+
+        	convexHull(Mat(contours[size1-2]), hulls[1],false);
         //cout<<"PODA MOKKA NAAYE"<<endl;
         //Mat drawing(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
-        Mat drawing = Mat::zeros( img_cropped.size(), CV_8UC3 );
-        cout<<hulls[1].size()<<endl;
+        	Mat drawing = Mat::zeros( img_cropped.size(), CV_8UC3 );
+        	cout<<hulls[1].size()<<endl;
         /*drawContours( drawing, hulls, -1, color, 1, 8);
         namedWindow( "Hull demo", WINDOW_AUTOSIZE );
         imshow( "Hull demo", drawing );
@@ -518,10 +518,26 @@ int main(int argc, char** argv) {
 		//createTrackbar("filterThreshDepth","",&filterThreshDepth,);
 
 
+		int lap_kernel_size = 5;
+		int lap_scale = 1;
+		int lap_delta = 0;
+		int lap_ddepth = CV_8UC1;
+
+		//GaussianBlur( img_cropped_temp3, img_cropped_temp3, Size(5, 5), 2, 1000 );
+
+		Laplacian(img_cropped_temp3, img_cropped_temp3, lap_ddepth, lap_kernel_size, lap_scale, lap_delta, BORDER_DEFAULT);
+
+		GaussianBlur( img_cropped_temp3, img_cropped_temp3, Size(5, 5), 2, 100 );
+
+		//findContours(img_cropped_temp3, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+		//drawContours(img_cropped_temp3,contours,-1,Scalar(125,125,125),3,8,hierarchy);
+
+		namedWindow("final-filter-1-lap", WINDOW_AUTOSIZE);
+		imshow("final-filter-1-lap", img_cropped_temp3);
 
 		
 		waitKey(0);
-
+/*
 		destroyWindow("img_cropped");
 		destroyWindow("img_cropped_edge");
 		destroyWindow("img_cropped_edge_inv");
@@ -543,7 +559,8 @@ int main(int argc, char** argv) {
 		destroyWindow("img_defects_2");
 		destroyWindow("img_defects_3_bin");
 		destroyWindow("final-filter-1");
-		destroyWindow("img_cropped");
+		destroyWindow("img_cropped");*/
+		destroyAllWindows();
 	//destroyWindow("img_cropped_bit_and_c_morph1_c_bit_and_inv");
 	//destroyWindow("img_cropped_bit_and_c_morph1_c_bit_and_inv_open");
 
