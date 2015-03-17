@@ -11,7 +11,7 @@ float toleranceFractionPointX = 0.2;
 float toleranceFractionPointY = 0.2;
 int filterThreshDepth = 10;
 
-
+int h=0,s=0,v=0;
 
 
 /*vector<Scalar> colors;
@@ -24,18 +24,129 @@ colors.push_back(Scalar(0,255,0));
 colors.push_back(Scalar(0,0,255));
 */
 
-/*void hsv2gray(Mat skin_mask,Mat* gray)
+void disp_hist_hsv_2D(Mat hsv)
+{
+	// Quantize the hue to 30 levels
+	// and the saturation to 32 levels
+	int hbins = 30, sbins = 32;
+	int histSize[] = {hbins, sbins};
+	// hue varies from 0 to 179, see cvtColor
+	float hranges[] = { 0, 180 };
+	// saturation varies from 0 (black-gray-white) to
+	// 255 (pure spectrum color)
+	float sranges[] = { 0, 256 };
+	const float * ranges[] = { hranges, sranges };
+	MatND hist;
+	// we compute the histogram from the 0-th and 1-st channels
+	int channels[] = {0, 1};
+
+	calcHist( &hsv, 1, channels, Mat(), // do not use mask
+	hist, 2, histSize, ranges,
+	true, // the histogram is uniform
+	false );
+
+	double maxVal=0;
+	minMaxLoc(hist, 0, &maxVal, 0, 0);
+	int scale = 10;
+	Mat histImg = Mat::zeros(sbins*scale, hbins*10, CV_8UC3);
+	for( int h = 0; h < hbins; h++ )
+	for( int s = 0; s < sbins; s++ )
+	{
+		float binVal = hist.at<float>(h, s);
+		int intensity = cvRound(binVal*255/maxVal);
+		rectangle( histImg, Point(h*scale, s*scale),Point( (h+1)*scale - 1, (s+1)*scale - 1),Scalar::all(intensity),CV_FILLED );
+	}
+
+	namedWindow( "H-S Histogram", 1 );
+	imshow( "H-S Histogram", histImg );
+}
+
+
+void disp_hist_hsv_1D(Mat src)
+{
+/// Separate the image in 3 places ( B, G and R )
+  vector<Mat> hsv_planes;
+  split( src, hsv_planes );
+
+  /// Establish the number of bins
+  int histSize = 256;
+
+  /// Set the ranges ( for B,G,R) )
+  float range[] = { 0, 256 } ;
+  const float* histRange = { range };
+
+  bool uniform = true; bool accumulate = false;
+
+  Mat h_hist, s_hist, v_hist;
+
+  /// Compute the histograms:
+  calcHist( &hsv_planes[0], 1, 0, Mat(), h_hist, 1, &histSize, &histRange, uniform, accumulate );
+  calcHist( &hsv_planes[1], 1, 0, Mat(), s_hist, 1, &histSize, &histRange, uniform, accumulate );
+  calcHist( &hsv_planes[2], 1, 0, Mat(), v_hist, 1, &histSize, &histRange, uniform, accumulate );
+
+  // Draw the histograms for h, s and v
+  int hist_w = 512; int hist_h = 400;
+  int bin_w = cvRound( (double) hist_w/histSize );
+
+  Mat histImage( hist_h, hist_w, CV_8UC3, Scalar( 0,0,0) );
+
+  /// Normalize the result to [ 0, histImage.rows ]
+  normalize(h_hist, h_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
+  normalize(s_hist, s_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
+  normalize(v_hist, v_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
+
+  /// Draw for each channel
+  for( int i = 1; i < histSize; i++ )
+  {
+      line( histImage, Point( bin_w*(i-1), hist_h - cvRound(h_hist.at<float>(i-1)) ) ,
+                       Point( bin_w*(i), hist_h - cvRound(h_hist.at<float>(i)) ),
+                       Scalar( 255, 0, 0), 2, 8, 0  );
+      line( histImage, Point( bin_w*(i-1), hist_h - cvRound(s_hist.at<float>(i-1)) ) ,
+                       Point( bin_w*(i), hist_h - cvRound(s_hist.at<float>(i)) ),
+                       Scalar( 0, 255, 0), 2, 8, 0  );
+      line( histImage, Point( bin_w*(i-1), hist_h - cvRound(v_hist.at<float>(i-1)) ) ,
+                       Point( bin_w*(i), hist_h - cvRound(v_hist.at<float>(i)) ),
+                       Scalar( 0, 0, 255), 2, 8, 0  );
+  }
+
+
+  double min_value,max_value;
+
+/*
+	cvGetMinMaxHistValue( h_hist, &min_value, &max_value);
+	cout<<"Minimum hue value  "<<min_value<<"   Maximum hue value  "<<max_value;
+	cvGetMinMaxHistValue( s_hist, min_value, max_value);
+	cout<<"Minimum saturation value  "<<min_value<<"   Maximum saturation value  "<<max_value;
+
+*/
+	minMaxLoc(h_hist,&min_value,&max_value, 0, 0);
+	cout<<"Minimum hue value  "<<min_value/2<<"   Maximum hue value  "<<max_value/2;
+	minMaxLoc(s_hist,&min_value,&max_value, 0, 0);
+	cout<<"\nMinimum saturation value  "<<min_value/2<<"   Maximum saturation value  "<<max_value/2;
+	minMaxLoc(v_hist,&min_value,&max_value, 0, 0);
+	cout<<"\nMinimum value value  "<<min_value/2<<"   Maximum value value  "<<max_value/2;
+
+
+  /// Display
+  namedWindow("calcHist Demo", CV_WINDOW_AUTOSIZE );
+  imshow("calcHist Demo", histImage );
+}
+
+void hsv2gray(Mat skin_mask,Mat* gray)
 {
 for(int i=0;i<skin_mask.rows;i++)
 	{	for(int j=0;j<skin_mask.cols;j++)
-		{
-			if(skin_mask.at<Vec3b>(i,j)==0)
+		{	Vec3b hsv=skin_mask.at<Vec3b>(i,j);
+			if(hsv.val[2]==0)
 				(*gray).at<uchar>(i,j)=0;
 		}
 	}
 }
-*/
-
+/*
+void skinmask(int,void*)
+{
+	inRange(*userdata,Scalar(0,30,60,0),Scalar(20,100,255,0), img_skinmask_hsv);
+}*/
 
 void CannyThreshold(Mat src_gray, Mat& edge_gray, int lowThreshold, int highThreshold, int kernel_size)
 {
@@ -115,7 +226,7 @@ int main(int argc, char** argv) {
 
 	Mat img_gray = imread(argv[1], CV_LOAD_IMAGE_GRAYSCALE);
 	Mat img_rgb = imread(argv[1], CV_LOAD_IMAGE_COLOR);
-	Mat img_hsv(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+	Mat img_hsv(img_gray.rows, img_gray.cols, CV_8UC3, Scalar::all(0));
 	cvtColor(img_rgb,img_hsv,CV_RGB2HSV);
 	namedWindow("win1", CV_WINDOW_AUTOSIZE);
 	imshow("win1", img_hsv);
@@ -130,6 +241,31 @@ int main(int argc, char** argv) {
 	Mat img_gray_bit_and_2(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat saturated(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_sharp(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+
+	Mat hsvchannels[3];
+	split(img_hsv,hsvchannels);
+
+	
+	Mat hue_img( img_gray.rows, img_gray.cols, CV_8UC3 );
+	Mat sat_img( img_gray.rows, img_gray.cols, CV_8UC3 );
+	Mat value_img( img_gray.rows, img_gray.cols, CV_8UC3 );
+	// forming an array of matrices is a quite efficient operation,
+	// because the matrix data is not copied, only the headers
+	Mat out[] = { hue_img, sat_img,value_img};
+	int from_to[] = { 0,0, 1,1, 2,2,};
+	mixChannels( &img_hsv, 1, out, 3, from_to, 3);
+/*
+	namedWindow("hue_img",WINDOW_AUTOSIZE);
+	imshow("hue_img",hue_img);
+	namedWindow("sat_img",WINDOW_AUTOSIZE);
+	imshow("sat_img",sat_img);
+	namedWindow("value_img",WINDOW_AUTOSIZE);
+	imshow("value_img",value_img);
+*/
+
+	disp_hist_hsv_2D(img_hsv);
+	disp_hist_hsv_1D(img_hsv);
+
 
 	/*
 		dilation_type
@@ -165,10 +301,16 @@ int main(int argc, char** argv) {
 		namedWindow("img_gray_sat", WINDOW_AUTOSIZE);
 		imshow("img_gray_sat", img_gray_sharp);
 
+		img_gray.copyTo(img_skinmask_hsv2rgb2gray);
+
 //H-0 and 50, in the channel S from 0.23 to 0.68
-	inRange(img_hsv,Scalar(0,0.23,100),Scalar(50,0.68,200), img_skinmask_hsv);
+	//inRange(img_hsv,Scalar(0,0.23,100),Scalar(50,0.68,200), img_skinmask_hsv);
+
+
+	inRange(img_hsv,Scalar(390,390,0),Scalar(410,410,255), img_skinmask_hsv);
+
 	//hsv2gray(img_skinmask_hsv,&img_skinmask_hsv2rgb2gray);
-	//cvtColor(img_skinmask_hsv,img_skinmask_hsv2rgb,CV_HSV2RGB);
+	//cvtColor(imgw_skinmask_hsv,img_skinmask_hsv2rgb,CV_HSV2RGB);
 	// cvtColor(img_skinmask_hsv2rgb,img_skinmask_hsv2rgb2gray,CV_RGB2GRAY);
 
 
@@ -183,12 +325,17 @@ int main(int argc, char** argv) {
 	namedWindow("img_gray_bit_and", WINDOW_AUTOSIZE);
 	imshow("img_gray_bit_and",img_gray_bit_and);
 
-	/*
+	
 
 	bitwise_and(img_gray, img_skinmask_hsv2rgb2gray,img_gray_bit_and_2);
 	namedWindow("img_gray_bit_and_2", WINDOW_AUTOSIZE);
 	imshow("img_gray_bit_and_2",img_gray_bit_and_2);
-*/
+
+	namedWindow("img_skinmask_hsv", WINDOW_AUTOSIZE);
+	imshow("img_skinmask_hsv",img_skinmask_hsv);
+
+	//createTrackbar( "hsv","img_skinmask_hsv",&h,255,&hsv,userdata=&img_skinmask_hsv );
+
 
 	//Some morphological operations -- dilate on(binary+otsu on img_gray_bit_and)
 

@@ -106,7 +106,9 @@ int main(int argc, char** argv) {
 	Mat img_defects_4(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_defects_5(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_defects_3_bin_inv(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
-	
+	Mat img_gray_temp4(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+	Mat img_gray_temp4_adthresh(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+
 
 	Mat img_defects_1(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_defects_2(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
@@ -390,6 +392,16 @@ int main(int argc, char** argv) {
 		bitwise_and(img_defects_3_bin_inv, img_defects_2, img_defects_4);
 		//bitwise_and(img_defects_4, img_gray_temp3, img_gray_temp3);
 		bitwise_and(img_defects_4, img_gray_bit_and_morph1_bit_and, img_gray_temp3);
+		bitwise_and(img_defects_4,img_gray,img_gray_temp4);
+
+adaptiveThreshold( img_gray_temp4, img_gray_temp4_adthresh,255,ADAPTIVE_THRESH_GAUSSIAN_C,THRESH_BINARY,11,0);
+
+
+		namedWindow("img_gray_temp4",WINDOW_AUTOSIZE);
+		imshow("img_gray_temp4",img_gray_temp4);
+
+		namedWindow("img_gray_temp4_adthresh",WINDOW_AUTOSIZE);
+		imshow("img_gray_temp4_adthresh",img_gray_temp4_adthresh);
 
 		namedWindow("img_defects_3_bin",WINDOW_AUTOSIZE);
 		imshow("img_defects_3_bin",img_defects_3_bin);
