@@ -126,7 +126,6 @@ void disp_hist_hsv_1D(Mat src)
 	minMaxLoc(v_hist,&min_value,&max_value, 0, 0);
 	cout<<"\nMinimum value value  "<<min_value/2<<"   Maximum value value  "<<max_value/2;
 
-for(int i=1;i<)
 
 
   /// Display

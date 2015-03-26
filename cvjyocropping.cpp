@@ -112,6 +112,7 @@ void disp_hist_hsv_1D(Mat src)
 
   double min_value,max_value;
   int minIdx,maxIdx;
+  Point minLoc,maxLoc;
 
 /*
 	cvGetMinMaxHistValue( h_hist, &min_value, &max_value);
@@ -120,16 +121,20 @@ void disp_hist_hsv_1D(Mat src)
 	cout<<"Minimum saturation value  "<<min_value<<"   Maximum saturation value  "<<max_value;
 
 */
+/*
 	minMaxLoc(h_hist,&min_value,&max_value, 0, 0);
 	cout<<"Minimum hue value  "<<min_value/2<<"   Maximum hue value  "<<max_value/2;
 	minMaxLoc(s_hist,&min_value,&max_value, 0, 0);
 	cout<<"\nMinimum saturation value  "<<min_value/2<<"   Maximum saturation value  "<<max_value/2;
 	minMaxLoc(v_hist,&min_value,&max_value, 0, 0);
 	cout<<"\nMinimum value value  "<<min_value/2<<"   Maximum value value  "<<max_value/2;
+*/
 
-	minMaxLoc(h_hist,&min_value,&max_value,&minIdx,&maxIdx);
-	cout<<"Minimum hue value  "<<minIdx<<"   Maximum hue value  "<<maxIdx;
-	minMaxLoc(s_hist,&min_value,&max_value, &minIdx,&maxIdx);
+	minMaxLoc(h_hist,&min_value,&max_value,&minLoc,&maxLoc);
+	cout<<"Minimum hue value  "<<h_hist.at<Vec3b>(minLoc)<<"   Maximum hue value  "<<h_hist.at<Vec3b>(maxLoc);
+	cout<<"\nMinimum hue minLoc  "<<minLoc<<"   Maximum hue maxLoc  "<<maxLoc;
+
+	minMaxLoc(s_hist,&min_value,&max_value, &minLoc,&maxLoc);
 	cout<<"\nMinimum saturation value  "<<min_value/2<<"   Maximum saturation value  "<<max_value/2;
 	minMaxLoc(v_hist,&min_value,&max_value, 0, 0);
 	cout<<"\nMinimum value value  "<<min_value/2<<"   Maximum value value  "<<max_value/2;
