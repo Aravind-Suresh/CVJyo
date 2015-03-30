@@ -90,25 +90,6 @@ void disp_hist_hsv_1D(Mat src)
 
   Mat histImage( hist_h, hist_w, CV_8UC3, Scalar( 0,0,0) );
 
-  /// Normalize the result to [ 0, histImage.rows ]
-  normalize(h_hist, h_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
-  normalize(s_hist, s_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
-  normalize(v_hist, v_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
-
-  /// Draw for each channel
-  for( int i = 1; i < histSize; i++ )
-  {
-      line( histImage, Point( bin_w*(i-1), hist_h - cvRound(h_hist.at<float>(i-1)) ) ,
-                       Point( bin_w*(i), hist_h - cvRound(h_hist.at<float>(i)) ),
-                       Scalar( 255, 0, 0), 2, 8, 0  );
-      line( histImage, Point( bin_w*(i-1), hist_h - cvRound(s_hist.at<float>(i-1)) ) ,
-                       Point( bin_w*(i), hist_h - cvRound(s_hist.at<float>(i)) ),
-                       Scalar( 0, 255, 0), 2, 8, 0  );
-      line( histImage, Point( bin_w*(i-1), hist_h - cvRound(v_hist.at<float>(i-1)) ) ,
-                       Point( bin_w*(i), hist_h - cvRound(v_hist.at<float>(i)) ),
-                       Scalar( 0, 0, 255), 2, 8, 0  );
-  }
-
 
   double min_value,max_value;
   int minIdx,maxIdx;
@@ -135,9 +116,39 @@ void disp_hist_hsv_1D(Mat src)
 	cout<<"\nMinimum hue minLoc  "<<minLoc<<"   Maximum hue maxLoc  "<<maxLoc;
 
 	minMaxLoc(s_hist,&min_value,&max_value, &minLoc,&maxLoc);
-	cout<<"\nMinimum saturation value  "<<min_value/2<<"   Maximum saturation value  "<<max_value/2;
+	cout<<"\nMinimum saturation value  "<<min_value<<"   Maximum saturation value  "<<max_value;
 	minMaxLoc(v_hist,&min_value,&max_value, 0, 0);
-	cout<<"\nMinimum value value  "<<min_value/2<<"   Maximum value value  "<<max_value/2;
+	cout<<"\nMinimum value value  "<<min_value<<"   Maximum value value  "<<max_value;
+
+
+
+  /// Normalize the result to [ 0, histImage.rows ]
+  normalize(h_hist, h_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
+  normalize(s_hist, s_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
+  normalize(v_hist, v_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
+
+  /// Draw for each channel
+  for( int i = 1; i < histSize; i++ )
+  {
+      line( histImage, Point( bin_w*(i-1), hist_h - cvRound(h_hist.at<float>(i-1)) ) ,
+                       Point( bin_w*(i), hist_h - cvRound(h_hist.at<float>(i)) ),
+                       Scalar( 255, 0, 0), 2, 8, 0  );
+      line( histImage, Point( bin_w*(i-1), hist_h - cvRound(s_hist.at<float>(i-1)) ) ,
+                       Point( bin_w*(i), hist_h - cvRound(s_hist.at<float>(i)) ),
+                       Scalar( 0, 255, 0), 2, 8, 0  );
+      line( histImage, Point( bin_w*(i-1), hist_h - cvRound(v_hist.at<float>(i-1)) ) ,
+                       Point( bin_w*(i), hist_h - cvRound(v_hist.at<float>(i)) ),
+                       Scalar( 0, 0, 255), 2, 8, 0  );
+  }
+
+	minMaxLoc(h_hist,&min_value,&max_value,&minLoc,&maxLoc);
+	cout<<"\n\nMinimum hue value  "<<h_hist.at<Vec3b>(minLoc)<<"   Maximum hue value  "<<h_hist.at<Vec3b>(maxLoc);
+	cout<<"\nMinimum hue minLoc  "<<minLoc<<"   Maximum hue maxLoc  "<<maxLoc;
+
+	minMaxLoc(s_hist,&min_value,&max_value, &minLoc,&maxLoc);
+	cout<<"\nMinimum saturation value  "<<min_value<<"   Maximum saturation value  "<<max_value;
+	minMaxLoc(h_hist,&min_value,&max_value, 0, 0);
+	cout<<"\nMinimum value value  "<<min_value<<"   Maximum value value  "<<max_value;
 
 
 
@@ -321,13 +332,13 @@ int main(int argc, char** argv) {
 //H-0 and 50, in the channel S from 0.23 to 0.68
 	//inRange(img_hsv,Scalar(0,0.23,100),Scalar(50,0.68,200), img_skinmask_hsv);
 
+//H Peaks-h102 && h18 // S Peaks-s50 && s54 // V Peaks- v76 && v137
 
-	inRange(img_hsv,Scalar(390,390,0),Scalar(410,410,255), img_skinmask_hsv);
+	inRange(img_hsv,Scalar(90,0,0),Scalar(150,255,255), img_skinmask_hsv);
 
 	//hsv2gray(img_skinmask_hsv,&img_skinmask_hsv2rgb2gray);
 	//cvtColor(imgw_skinmask_hsv,img_skinmask_hsv2rgb,CV_HSV2RGB);
 	// cvtColor(img_skinmask_hsv2rgb,img_skinmask_hsv2rgb2gray,CV_RGB2GRAY);
-
 
 	inRange(img_gray, 110,255, img_skinmask);				//TODO : Make it adaptive
 	for(int x=0;x<img_skinmask.cols;x++) {
