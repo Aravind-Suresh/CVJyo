@@ -2,6 +2,8 @@
 
 #include<opencv2/opencv.hpp>
 #include<iostream>
+#include<string.h>
+#include<stdlib.h>
 
 using namespace cv;
 using namespace std;
@@ -61,6 +63,15 @@ bool comparatorConvexityDefectsSetDepth (Vec4i a, Vec4i b) {
 	return ( i < j );
 }
 
+void showImages(int l, int h, vector<Mat> imgs) {
+	for(int i=l;i<=h;i++) {
+		char str[2];
+		str[0] = (char)(i+49);
+		str[1] = '\0';
+		imshow(str, imgs[i]);
+	}
+}
+
 int main(int argc, char** argv) {
 	Mat img_gray = imread(argv[1], CV_LOAD_IMAGE_GRAYSCALE);
 	Mat img_rgb = imread(argv[1], CV_LOAD_IMAGE_COLOR);
@@ -73,9 +84,9 @@ int main(int argc, char** argv) {
 	vector<Mat> imgs(10);
 
 	/*
-	 *	0 -
-	 *	1 - 
-	 *	2 - 
+	 *	0 - blur
+	 *	1 - + canny
+	 *	2 - + laplacian
 	 *	3 - 
 	 *	4 - 
 	 *
@@ -99,12 +110,12 @@ int main(int argc, char** argv) {
 	int kernel_size = 3;
 
 	//Canny followed by Laplacian
-	GaussianBlur( img_gray, imgs[0], Size(5,5), 2, 2 );
+	GaussianBlur( img_gray, imgs[0], Size(3,3), 2, 2 );
 	CannyThreshold(img_gray, imgs[0], lowThreshold, lowThreshold*ratio, kernel_size);
 	Laplacian(imgs[0], imgs[1], CV_8UC1, 3);
+	GaussianBlur( imgs[1], imgs[2], Size(5,5), 2, 2 );	
 
-	imshow("img0", imgs[0]);
-	imshow("img1", imgs[1]);
+	showImages(0, 2, imgs);
 
 	waitKey(0);
 	destroyAllWindows();
