@@ -531,7 +531,7 @@ int main(int argc, char** argv) {
 		bitwise_and(img_defects_4, img_cropped_bit_and_c_morph1_c_bit_and, img_cropped_temp3);
 		/*erode( img_cropped_temp3, img_cropped_temp3 , element );
 		dilate( img_cropped_temp3, img_cropped_temp3 , element );*/
-		//morphologyEx(img_cropped_temp3, img_cropped_temp3_open, OPEN, kernelOpen, Point(-1,-1), 1, BORDER_CONSTANT);
+		//morphologyEx(img_croppedcropped_temp3, img_cropped_temp3_open, OPEN, kernelOpen, Point(-1,-1), 1, BORDER_CONSTANT);
 		//Laplacian( const oclMat& src, oclMat& dst, int ddepth, int ksize=1, double scale=1, double delta=0, int borderType=BORDER_DEFAULT )
 
 

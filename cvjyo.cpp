@@ -320,8 +320,6 @@ int main(int argc, char** argv) {
 			circle(img_gray_temp, contours[size1-2][defectPtIdx] , 10, color, 2, 8, 0 );
 			circle(img_hull_black, contours[size1-2][startIdx] , 10, color, 2, 8, 0 );
 			circle(img_hull_3, contours[size1-2][endIdx] , 10, color, 2, 8, 0 );
-
-			
 		}
 		namedWindow("img_hull_defect",WINDOW_AUTOSIZE);
 		imshow("img_hull_defect", img_gray_temp);

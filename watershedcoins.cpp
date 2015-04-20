@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
 
 	img_gray_d_t.copyTo(img_gray_d_t_G);
 
-	threshold(img_gray_d_t_G, img_gray_d_t_thresh_G,0, 1, THRESH_BINARY);
+	threshold(img_gray_d_t_G, img_gray_d_t_thresh_G,0.5, 1, THRESH_BINARY);
 	namedWindow("dt-thresh", WINDOW_AUTOSIZE);
 	imshow("dt-thresh", img_gray_d_t_thresh_G);
 	createTrackbar("Threshold value","dt-thresh",&value,255,dt_thresh_callback);
