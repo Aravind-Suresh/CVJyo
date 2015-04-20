@@ -90,6 +90,38 @@ void disp_hist_hsv_1D(Mat src)
 
   Mat histImage( hist_h, hist_w, CV_8UC3, Scalar( 0,0,0) );
 
+
+  double min_value,max_value;
+  int minIdx,maxIdx;
+  Point minLoc,maxLoc;
+
+/*
+	cvGetMinMaxHistValue( h_hist, &min_value, &max_value);
+	cout<<"Minimum hue value  "<<min_value<<"   Maximum hue value  "<<max_value;
+	cvGetMinMaxHistValue( s_hist, min_value, max_value);
+	cout<<"Minimum saturation value  "<<min_value<<"   Maximum saturation value  "<<max_value;
+
+*/
+/*
+	minMaxLoc(h_hist,&min_value,&max_value, 0, 0);
+	cout<<"Minimum hue value  "<<min_value/2<<"   Maximum hue value  "<<max_value/2;
+	minMaxLoc(s_hist,&min_value,&max_value, 0, 0);
+	cout<<"\nMinimum saturation value  "<<min_value/2<<"   Maximum saturation value  "<<max_value/2;
+	minMaxLoc(v_hist,&min_value,&max_value, 0, 0);
+	cout<<"\nMinimum value value  "<<min_value/2<<"   Maximum value value  "<<max_value/2;
+*/
+
+	minMaxLoc(h_hist,&min_value,&max_value,&minLoc,&maxLoc);
+	cout<<"Minimum hue value  "<<h_hist.at<Vec3b>(minLoc)<<"   Maximum hue value  "<<h_hist.at<Vec3b>(maxLoc);
+	cout<<"\nMinimum hue minLoc  "<<minLoc<<"   Maximum hue maxLoc  "<<maxLoc;
+
+	minMaxLoc(s_hist,&min_value,&max_value, &minLoc,&maxLoc);
+	cout<<"\nMinimum saturation value  "<<min_value<<"   Maximum saturation value  "<<max_value;
+	minMaxLoc(v_hist,&min_value,&max_value, 0, 0);
+	cout<<"\nMinimum value value  "<<min_value<<"   Maximum value value  "<<max_value;
+
+
+
   /// Normalize the result to [ 0, histImage.rows ]
   normalize(h_hist, h_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
   normalize(s_hist, s_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
@@ -109,22 +141,15 @@ void disp_hist_hsv_1D(Mat src)
                        Scalar( 0, 0, 255), 2, 8, 0  );
   }
 
+	minMaxLoc(h_hist,&min_value,&max_value,&minLoc,&maxLoc);
+	cout<<"\n\nMinimum hue value  "<<h_hist.at<Vec3b>(minLoc)<<"   Maximum hue value  "<<h_hist.at<Vec3b>(maxLoc);
+	cout<<"\nMinimum hue minLoc  "<<minLoc<<"   Maximum hue maxLoc  "<<maxLoc;
 
-  double min_value,max_value;
-  int minIdx,maxIdx;
-/*
-	cvGetMinMaxHistValue( h_hist, &min_value, &max_value);
-	cout<<"Minimum hue value  "<<min_value<<"   Maximum hue value  "<<max_value;
-	cvGetMinMaxHistValue( s_hist, min_value, max_value);
-	cout<<"Minimum saturation value  "<<min_value<<"   Maximum saturation value  "<<max_value;
+	minMaxLoc(s_hist,&min_value,&max_value, &minLoc,&maxLoc);
+	cout<<"\nMinimum saturation value  "<<min_value<<"   Maximum saturation value  "<<max_value;
+	minMaxLoc(h_hist,&min_value,&max_value, 0, 0);
+	cout<<"\nMinimum value value  "<<min_value<<"   Maximum value value  "<<max_value;
 
-*/
-	minMaxLoc(h_hist,&min_value,&max_value,&minIdx,&maxIdx);
-	cout<<"Minimum hue value  "<<minIdx<<"   Maximum hue value  "<<maxIdx;
-	minMaxLoc(s_hist,&min_value,&max_value, &minIdx,&maxIdx);
-	cout<<"\nMinimum saturation value  "<<min_value/2<<"   Maximum saturation value  "<<max_value/2;
-	minMaxLoc(v_hist,&min_value,&max_value, 0, 0);
-	cout<<"\nMinimum value value  "<<min_value/2<<"   Maximum value value  "<<max_value/2;
 
 
 
@@ -173,7 +198,7 @@ void cropHand(Mat src, Mat* result, int max_x, int min_x, int max_y, int min_y)
 {cout<<"cropHand called";
 for (int i=min_y;i<max_y;i++)
 	for(int j=min_x;j<max_x;j++)
-		(*result).at<uchar>(i-min_y,j-min_x)=src.at<uchar>(i,j);
+(*result).at<uchar>(i-min_y,j-min_x)=src.at<uchar>(i,j);
 
 }
 
@@ -223,19 +248,25 @@ bool comparatorConvexityDefectsSetDepth (Vec4i a, Vec4i b) {
 
 int main(int argc, char** argv) {
 
+	//VideoCapture cap(0);
 
-
-	Mat img_gray = imread(argv[1], CV_LOAD_IMAGE_GRAYSCALE);
-	Mat img_rgb = imread(argv[1], CV_LOAD_IMAGE_COLOR);
-	Mat img_hsv(img_gray.rows, img_gray.cols, CV_8UC3, Scalar::all(0));
-	cvtColor(img_rgb,img_hsv,CV_RGB2HSV);
-	namedWindow("win1", CV_WINDOW_AUTOSIZE);
-	imshow("win1", img_hsv);
+	//Mat img_gray ;
+	// cap >> img_gray;
+	// cvtColor(img_gray,img_gray,CV_RGB2GRAY);
+	 Mat img_gray = imread(argv[1], CV_LOAD_IMAGE_GRAYSCALE);
+	
+	// Mat img_rgb = imread(argv[1], CV_LOAD_IMAGE_COLOR);
+	 Mat img_hsv(img_gray.rows, img_gray.cols, CV_8UC3, Scalar::all(0));
+	// cvtColor(img_rgb,img_hsv,CV_RGB2HSV);
+	// namedWindow("win1", CV_WINDOW_AUTOSIZE);
+	// imshow("win1", img_hsv);
+	
 	Mat img_skinmask(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_skinmask_hsv(img_gray.rows, img_gray.cols, CV_32F,Scalar::all(0));
 	Mat img_skinmask_hsv2rgb(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_skinmask_hsv2rgb2gray(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_bit_and_morph1(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+	Mat img_gray_otsu(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_bit_and_morph1_dil(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_bit_and_morph1_dil_temp(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_bit_and(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
@@ -307,13 +338,13 @@ int main(int argc, char** argv) {
 //H-0 and 50, in the channel S from 0.23 to 0.68
 	//inRange(img_hsv,Scalar(0,0.23,100),Scalar(50,0.68,200), img_skinmask_hsv);
 
+//H Peaks-h102 && h18 // S Peaks-s50 && s54 // V Peaks- v76 && v137
 
-	inRange(img_hsv,Scalar(390,390,0),Scalar(410,410,255), img_skinmask_hsv);
+	inRange(img_hsv,Scalar(90,0,0),Scalar(150,255,255), img_skinmask_hsv);
 
 	//hsv2gray(img_skinmask_hsv,&img_skinmask_hsv2rgb2gray);
 	//cvtColor(imgw_skinmask_hsv,img_skinmask_hsv2rgb,CV_HSV2RGB);
 	// cvtColor(img_skinmask_hsv2rgb,img_skinmask_hsv2rgb2gray,CV_RGB2GRAY);
-
 
 	inRange(img_gray, 110,255, img_skinmask);				//TODO : Make it adaptive
 	for(int x=0;x<img_skinmask.cols;x++) {
@@ -344,7 +375,10 @@ int main(int argc, char** argv) {
 	//ADAPTIVE_THRESH_MEAN_C or ADAPTIVE_THRESH_GAUSSIAN_C
 	//adaptiveThreshold(img_gray_bit_and, img_gray_bit_and_morph1, 255,ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 5,0);
 
+	threshold(img_gray, img_gray_otsu, 0, 255, THRESH_BINARY + THRESH_OTSU);
 
+	namedWindow("img_gray_otsu", WINDOW_AUTOSIZE);
+	imshow("img_gray_otsu",img_gray_otsu);
 
 	Mat element = getStructuringElement( dilation_type[0],
 		Size( 2*dilation_size + 1, 2*dilation_size+1 ),
@@ -361,7 +395,7 @@ int main(int argc, char** argv) {
 	vector<vector<Point> > contours_minMax;
 	img_gray_bit_and_morph1_dil.copyTo(img_gray_bit_and_morph1_dil_temp);	
 	findContours(img_gray_bit_and_morph1_dil_temp, contours_minMax, hierarchy_minMax, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
-	sort(contours_minMax.begin(),contours_minMax.end(),comparatorContourAreas);
+    sort(contours_minMax.begin(),contours_minMax.end(),comparatorContourAreas);
     // cout<<"\ncontours_minMax size"<<contours_minMax.size();
 	drawContours(img_gray_bit_and_morph1_dil,contours_minMax,contours_minMax.size()-1,Scalar(125,125,125),3,8,hierarchy_minMax);
 
@@ -406,6 +440,8 @@ int main(int argc, char** argv) {
 	Mat img_cropped_bit_and_c_morph1_c_dil(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
 	Mat img_cropped_bit_and_c_morph1_c_dil_temp(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
 	Mat img_cropped_temp3_open(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_cropped_laplacian(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+
 
 
 
@@ -512,19 +548,19 @@ int main(int argc, char** argv) {
         	}
         	//cout<<a<<endl<<pos;
         }*/
+        
+        vector<Vec4i> convexityDefectsSet;
+        sort(contours.begin(),contours.end(),comparatorContourAreas);
+        int size1 = contours.size();
+        
+        
+        vector<vector<int> >hulls( contours.size() );
 
-        	vector<Vec4i> convexityDefectsSet;
-        	sort(contours.begin(),contours.end(),comparatorContourAreas);
-        	int size1 = contours.size();
-
-
-        	vector<vector<int> >hulls( contours.size() );
-
-        	convexHull(Mat(contours[size1-2]), hulls[1],false);
+        convexHull(Mat(contours[size1-2]), hulls[1],false);
         //cout<<"PODA MOKKA NAAYE"<<endl;
         //Mat drawing(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
-        	Mat drawing = Mat::zeros( img_cropped.size(), CV_8UC3 );
-        	cout<<hulls[1].size()<<endl;
+        Mat drawing = Mat::zeros( img_cropped.size(), CV_8UC3 );
+        cout<<hulls[1].size()<<endl;
         /*drawContours( drawing, hulls, -1, color, 1, 8);
         namedWindow( "Hull demo", WINDOW_AUTOSIZE );
         imshow( "Hull demo", drawing );
@@ -659,7 +695,7 @@ int main(int argc, char** argv) {
 	//morphologyEx(img_cropped_bit_and_c_morph1_c_bit_and_inv, img_cropped_bit_and_c_morph1_c_bit_and_inv_open, MORPH_OPEN, kernelOpen, Point(-1,-1), 1, BORDER_CONSTANT);
 	//namedWindow("img_cropped_bit_and_c_morph1_c_bit_and_inv_open", WINDOW_AUTOSIZE);
 	//imshow("img_cropped_bit_and_c_morph1_c_bit_and_inv_open",img_cropped_bit_and_c_morph1_c_bit_and_inv_open);
-
+ 
 
 		add(img_cropped_edge, img_cropped, img_cropped_sharp, noArray(), -1);
 		namedWindow("img_cropped_sharp", WINDOW_AUTOSIZE);
@@ -679,9 +715,11 @@ int main(int argc, char** argv) {
 		bitwise_and(img_defects_4, img_cropped_bit_and_c_morph1_c_bit_and, img_cropped_temp3);
 		/*erode( img_cropped_temp3, img_cropped_temp3 , element );
 		dilate( img_cropped_temp3, img_cropped_temp3 , element );*/
-		//morphologyEx(img_croppedcropped_temp3, img_cropped_temp3_open, OPEN, kernelOpen, Point(-1,-1), 1, BORDER_CONSTANT);
-		//Laplacian( const oclMat& src, oclMat& dst, int ddepth, int ksize=1, double scale=1, double delta=0, int borderType=BORDER_DEFAULT )
+		//morphologyEx(img_cropped_temp3, img_cropped_temp3_open, OPEN, kernelOpen, Point(-1,-1), 1, BORDER_CONSTANT);
+		Laplacian( img_cropped,img_cropped_laplacian,0,1,1,0,BORDER_DEFAULT );
 
+		namedWindow("img_cropped_laplacian",WINDOW_AUTOSIZE);
+		imshow("img_cropped_laplacian",img_cropped_laplacian);
 
 		namedWindow("img_defects_3_bin",WINDOW_AUTOSIZE);
 		imshow("img_defects_3_bin",img_defects_3_bin);
@@ -711,26 +749,10 @@ int main(int argc, char** argv) {
 		//createTrackbar("filterThreshDepth","",&filterThreshDepth,);
 
 
-		int lap_kernel_size = 5;
-		int lap_scale = 1;
-		int lap_delta = 0;
-		int lap_ddepth = CV_8UC1;
-
-		//GaussianBlur( img_cropped_temp3, img_cropped_temp3, Size(5, 5), 2, 1000 );
-
-		Laplacian(img_cropped_temp3, img_cropped_temp3, lap_ddepth, lap_kernel_size, lap_scale, lap_delta, BORDER_DEFAULT);
-
-		GaussianBlur( img_cropped_temp3, img_cropped_temp3, Size(5, 5), 2, 100 );
-
-		//findContours(img_cropped_temp3, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
-		//drawContours(img_cropped_temp3,contours,-1,Scalar(125,125,125),3,8,hierarchy);
-
-		namedWindow("final-filter-1-lap", WINDOW_AUTOSIZE);
-		imshow("final-filter-1-lap", img_cropped_temp3);
 
 		
 		waitKey(0);
-/*
+
 		destroyWindow("img_cropped");
 		destroyWindow("img_cropped_edge");
 		destroyWindow("img_cropped_edge_inv");
@@ -752,8 +774,7 @@ int main(int argc, char** argv) {
 		destroyWindow("img_defects_2");
 		destroyWindow("img_defects_3_bin");
 		destroyWindow("final-filter-1");
-		destroyWindow("img_cropped");*/
-		destroyAllWindows();
+		destroyWindow("img_cropped");
 	//destroyWindow("img_cropped_bit_and_c_morph1_c_bit_and_inv");
 	//destroyWindow("img_cropped_bit_and_c_morph1_c_bit_and_inv_open");
 
