@@ -248,19 +248,25 @@ bool comparatorConvexityDefectsSetDepth (Vec4i a, Vec4i b) {
 
 int main(int argc, char** argv) {
 
+	//VideoCapture cap(0);
 
-
-	Mat img_gray = imread(argv[1], CV_LOAD_IMAGE_GRAYSCALE);
-	Mat img_rgb = imread(argv[1], CV_LOAD_IMAGE_COLOR);
-	Mat img_hsv(img_gray.rows, img_gray.cols, CV_8UC3, Scalar::all(0));
-	cvtColor(img_rgb,img_hsv,CV_RGB2HSV);
-	namedWindow("win1", CV_WINDOW_AUTOSIZE);
-	imshow("win1", img_hsv);
+	//Mat img_gray ;
+	// cap >> img_gray;
+	// cvtColor(img_gray,img_gray,CV_RGB2GRAY);
+	 Mat img_gray = imread(argv[1], CV_LOAD_IMAGE_GRAYSCALE);
+	
+	// Mat img_rgb = imread(argv[1], CV_LOAD_IMAGE_COLOR);
+	 Mat img_hsv(img_gray.rows, img_gray.cols, CV_8UC3, Scalar::all(0));
+	// cvtColor(img_rgb,img_hsv,CV_RGB2HSV);
+	// namedWindow("win1", CV_WINDOW_AUTOSIZE);
+	// imshow("win1", img_hsv);
+	
 	Mat img_skinmask(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_skinmask_hsv(img_gray.rows, img_gray.cols, CV_32F,Scalar::all(0));
 	Mat img_skinmask_hsv2rgb(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_skinmask_hsv2rgb2gray(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_bit_and_morph1(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+	Mat img_gray_otsu(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_bit_and_morph1_dil(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_bit_and_morph1_dil_temp(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
 	Mat img_gray_bit_and(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
@@ -369,7 +375,10 @@ int main(int argc, char** argv) {
 	//ADAPTIVE_THRESH_MEAN_C or ADAPTIVE_THRESH_GAUSSIAN_C
 	//adaptiveThreshold(img_gray_bit_and, img_gray_bit_and_morph1, 255,ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 5,0);
 
+	threshold(img_gray, img_gray_otsu, 0, 255, THRESH_BINARY + THRESH_OTSU);
 
+	namedWindow("img_gray_otsu", WINDOW_AUTOSIZE);
+	imshow("img_gray_otsu",img_gray_otsu);
 
 	Mat element = getStructuringElement( dilation_type[0],
 		Size( 2*dilation_size + 1, 2*dilation_size+1 ),
@@ -431,6 +440,8 @@ int main(int argc, char** argv) {
 	Mat img_cropped_bit_and_c_morph1_c_dil(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
 	Mat img_cropped_bit_and_c_morph1_c_dil_temp(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
 	Mat img_cropped_temp3_open(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+	Mat img_cropped_laplacian(img_cropped.rows, img_cropped.cols, CV_8UC1, Scalar::all(0));
+
 
 
 
@@ -684,7 +695,7 @@ int main(int argc, char** argv) {
 	//morphologyEx(img_cropped_bit_and_c_morph1_c_bit_and_inv, img_cropped_bit_and_c_morph1_c_bit_and_inv_open, MORPH_OPEN, kernelOpen, Point(-1,-1), 1, BORDER_CONSTANT);
 	//namedWindow("img_cropped_bit_and_c_morph1_c_bit_and_inv_open", WINDOW_AUTOSIZE);
 	//imshow("img_cropped_bit_and_c_morph1_c_bit_and_inv_open",img_cropped_bit_and_c_morph1_c_bit_and_inv_open);
-
+ 
 
 		add(img_cropped_edge, img_cropped, img_cropped_sharp, noArray(), -1);
 		namedWindow("img_cropped_sharp", WINDOW_AUTOSIZE);
@@ -705,8 +716,10 @@ int main(int argc, char** argv) {
 		/*erode( img_cropped_temp3, img_cropped_temp3 , element );
 		dilate( img_cropped_temp3, img_cropped_temp3 , element );*/
 		//morphologyEx(img_cropped_temp3, img_cropped_temp3_open, OPEN, kernelOpen, Point(-1,-1), 1, BORDER_CONSTANT);
-		//Laplacian( const oclMat& src, oclMat& dst, int ddepth, int ksize=1, double scale=1, double delta=0, int borderType=BORDER_DEFAULT )
+		Laplacian( img_cropped,img_cropped_laplacian,0,1,1,0,BORDER_DEFAULT );
 
+		namedWindow("img_cropped_laplacian",WINDOW_AUTOSIZE);
+		imshow("img_cropped_laplacian",img_cropped_laplacian);
 
 		namedWindow("img_defects_3_bin",WINDOW_AUTOSIZE);
 		imshow("img_defects_3_bin",img_defects_3_bin);

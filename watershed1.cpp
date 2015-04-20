@@ -49,19 +49,20 @@ int main(int argc, char** argv) {
 	erode(img_gray_otsu, img1, getStructuringElement(erosion_type[1], Size(3,3), Point(1,1)));
 	namedWindow("otsu", WINDOW_AUTOSIZE);
 	imshow("otsu", img_gray_otsu);
-/*
 
+/*
 	Laplacian(img_gray, img_gray, ddepth, kernel_size, scale, delta, BORDER_DEFAULT);
 
-	bitwise_and(img1, img_gray, img_gray);*/
-/*
+	bitwise_and(img1, img_gray, img_gray);
+
 
 	erode(img_gray, img_gray, elementErode);
-	dilate(img_gray, img_gray, elementDilate);*/
+	dilate(img_gray, img_gray, elementDilate);
 
 	namedWindow("lapl-img", WINDOW_AUTOSIZE);
 	imshow("lapl-img", img_gray);
-
+*/
+	
 	GaussianBlur( img_gray, img_gray, Size(5, 5), 2, 100);
 
 	threshold(img_gray, img_gray_thresh, 0, 255, THRESH_BINARY + THRESH_OTSU);
