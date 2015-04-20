@@ -99,26 +99,78 @@ int main(int argc, char** argv) {
 	 *
 	 */
 
-	for(int i=0;i<imgs.size();i++) {
-		img_gray.copyTo(imgs[i]);
-	}
+	 for(int i=0;i<imgs.size();i++) {
+	 	img_gray.copyTo(imgs[i]);
+	 }
 
-	int edgeThresh = 1;
-	int lowThreshold = 30;
-	int const max_lowThreshold = 100;
-	int ratio = 1;
-	int kernel_size = 3;
+	 int edgeThresh = 1;
+	 int lowThreshold = 30;
+	 int const max_lowThreshold = 100;
+	 int ratio = 1;
+	 int kernel_size = 3;
+
+	 vector<vector<Point> > contours;
+	 vector<int> arcl;
+	 int pos,a;
+	 vector<Vec4i> hierarchy;
 
 	//Canny followed by Laplacian
-	GaussianBlur( img_gray, imgs[0], Size(3,3), 2, 2 );
-	CannyThreshold(img_gray, imgs[0], lowThreshold, lowThreshold*ratio, kernel_size);
-	Laplacian(imgs[0], imgs[1], CV_8UC1, 3);
-	GaussianBlur( imgs[1], imgs[2], Size(5,5), 2, 2 );	
+	 GaussianBlur( img_gray, imgs[0], Size(3,3), 2, 2 );
+	 CannyThreshold(img_gray, imgs[0], lowThreshold, lowThreshold*ratio, kernel_size);
+	 Laplacian(imgs[0], imgs[1], CV_8UC1, 3);
+	 GaussianBlur( imgs[1], imgs[2], Size(5,5), 2, 2 );
+	 imshow("temp-2", imgs[2]);
 
-	showImages(0, 2, imgs);
+	 vector<Vec4i> convexityDefectsSet;
 
-	waitKey(0);
-	destroyAllWindows();
+	 findContours(imgs[2], contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 
-	return 0;
-}
+	 sort(contours.begin(),contours.end(),comparatorContourAreas);
+	 int size1 = contours.size();
+
+	 vector<int> hull;
+
+	 convexHull(Mat(contours[size1-1]), hull,false);
+
+	 Scalar color( 0,0,0 );
+	 drawContours(img_gray,contours,contours.size()-1, color,2, 8, hierarchy);
+	 convexityDefects(contours[size1-1], hull, convexityDefectsSet);
+
+	 int filterThreshDepth = 10;
+	 vector<Point> defectsPoints;
+
+	 sort(convexityDefectsSet.begin(), convexityDefectsSet.end(), comparatorConvexityDefectsSetDepth);
+	 int minposx=0;
+
+	 for(int k=0;k<convexityDefectsSet.size();k++) {
+	 	int startIdx = convexityDefectsSet[k].val[0];
+	 	int endIdx = convexityDefectsSet[k].val[1];
+	 	int defectPtIdx = convexityDefectsSet[k].val[2];
+	 	double depth = static_cast<double>(convexityDefectsSet[k].val[3]) / 256.0;
+
+	 	cout<<endl<<k<<"  ";
+
+	 	cout << startIdx << ' ' << endIdx << ' ' << defectPtIdx << ' ' << depth << endl;
+
+	 	Scalar color = Scalar( 0,0,0 );
+	 	float toleranceFractionPointX = 0.05;
+	 	float toleranceFractionPointY = 0.05;
+
+	 	Point p = contours[size1-1][defectPtIdx];
+	 	if(k>=filterThreshDepth && checkPointInRegion(img_gray, toleranceFractionPointX, toleranceFractionPointY, p)) {
+	 		defectsPoints.push_back(p);
+	 		circle(imgs[3], contours[size1-1][defectPtIdx] , 10, color, 2, 8, 0 );
+	 	}
+	 	color = Scalar(0,0,0);
+	 	circle(imgs[4], contours[size1-1][defectPtIdx] , 10, color, 2, 8, 0 );
+	 	circle(imgs[5], contours[size1-1][startIdx] , 10, color, 2, 8, 0 );
+	 	circle(imgs[6], contours[size1-1][endIdx] , 10, color, 2, 8, 0 );
+	 }
+
+	 showImages(0, 5, imgs);
+
+	 waitKey(0);
+	 destroyAllWindows();
+
+	 return 0;
+	}
