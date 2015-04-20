@@ -123,7 +123,9 @@ int main(int argc, char** argv) {
 
 	 vector<Vec4i> convexityDefectsSet;
 
-	 findContours(imgs[2], contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+	 Mat imgtemp;
+	 imgs[2].copyTo(imgtemp);
+	 findContours(imgtemp, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 
 	 sort(contours.begin(),contours.end(),comparatorContourAreas);
 	 int size1 = contours.size();
@@ -167,7 +169,16 @@ int main(int argc, char** argv) {
 	 	circle(imgs[6], contours[size1-1][endIdx] , 10, color, 2, 8, 0 );
 	 }
 
-	 showImages(0, 5, imgs);
+	 Point2f minEncCirCenter;
+	 float minEncRad;
+
+	 minEnclosingCircle(defectsPoints, minEncCirCenter, minEncRad);
+	 imgs[7] = Scalar::all(0);
+	 circle(imgs[7], minEncCirCenter, minEncRad, Scalar(255,255,255), -1, 8, 0);
+
+	 bitwise_and(imgs[7], imgs[0], imgs[8]);
+
+	 showImages(0, 8, imgs);
 
 	 waitKey(0);
 	 destroyAllWindows();
