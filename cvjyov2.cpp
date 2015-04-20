@@ -73,15 +73,19 @@ void showImages(int l, int h, vector<Mat> imgs) {
 }
 
 int main(int argc, char** argv) {
+
+	RNG rng(12345);
+
 	Mat img_gray = imread(argv[1], CV_LOAD_IMAGE_GRAYSCALE);
 	Mat img_rgb = imread(argv[1], CV_LOAD_IMAGE_COLOR);
 	Mat img_hsv(img_gray.rows, img_gray.cols, CV_8UC1, Scalar::all(0));
+
 	cvtColor(img_rgb,img_hsv,CV_RGB2HSV);
 
 	imshow("img_hsv", img_hsv);
 
 	//Storage for all Mat images used during this program execution
-	vector<Mat> imgs(10);
+	vector<Mat> imgs(25);
 
 	/*
 	 *	0 - blur
@@ -110,13 +114,16 @@ int main(int argc, char** argv) {
 	 int kernel_size = 3;
 
 	 vector<vector<Point> > contours;
-	 vector<int> arcl;
-	 int pos,a;
 	 vector<Vec4i> hierarchy;
 
 	//Canny followed by Laplacian
 	 GaussianBlur( img_gray, imgs[0], Size(3,3), 2, 2 );
 	 CannyThreshold(img_gray, imgs[0], lowThreshold, lowThreshold*ratio, kernel_size);
+
+	 //median blur on canny to remove salt and pepper noise
+
+	 //medianBlur(imgs[0], imgs[0], 1);
+
 	 Laplacian(imgs[0], imgs[1], CV_8UC1, 3);
 	 GaussianBlur( imgs[1], imgs[2], Size(5,5), 2, 2 );
 	 imshow("temp-2", imgs[2]);
@@ -176,9 +183,52 @@ int main(int argc, char** argv) {
 	 imgs[7] = Scalar::all(0);
 	 circle(imgs[7], minEncCirCenter, minEncRad, Scalar(255,255,255), -1, 8, 0);
 
-	 bitwise_and(imgs[7], imgs[0], imgs[8]);
+	 bitwise_and(imgs[7], imgs[1], imgs[8]);
 
-	 showImages(0, 8, imgs);
+	 vector<vector<Point> > contours1;
+	 vector<Vec4i> hierarchy1;
+
+	 imgs[8].copyTo(imgtemp);
+	 imgs[8].copyTo(imgs[9]);
+	 findContours(imgtemp, contours1, hierarchy1, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+
+	 for(int i=0;i<contours1.size();i++) {
+	 	Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+	 	drawContours(imgs[9],contours1,i, color,2, 8, hierarchy1);
+	 }
+
+	 threshold( imgs[9], imgs[10], 1, 255, 0 );		
+	 //threshold binary - 255 for all I(x,y)>1 , 0 for all I(x,y) = 0
+	 bitwise_not(imgs[10],imgs[11]);
+	 threshold(imgs[13], imgs[12], 0, 255, THRESH_BINARY + THRESH_OTSU);
+
+	 //imshow("otsu", imgs[12]);
+	 bitwise_and(imgs[11],imgs[12],imgs[13]);
+
+	 Mat img_otsu_32(img_gray.rows, img_gray.cols, CV_32F, Scalar::all(1));
+	 imgs[12].convertTo(img_otsu_32, CV_32F);
+
+	 //imshow("otsu_32", img_otsu_32);
+
+	 Mat img_ones(img_gray.rows, img_gray.cols, CV_32F, Scalar::all(0.8));
+	 bitwise_and(img_otsu_32,img_ones,img_ones);
+
+	 Mat img_dt(img_gray.rows, img_gray.cols, CV_32F, Scalar::all(0));
+
+	 distanceTransform(imgs[12], img_dt, CV_DIST_L2, 3);
+	 normalize(img_dt, img_dt, 0, 0.2, NORM_MINMAX);
+
+	 //convert
+
+	 Mat img_out(img_gray.rows, img_gray.cols, CV_32F, Scalar::all(0));	 
+
+	 add(img_ones, img_dt, img_out, noArray(), -1);
+
+	 imshow("img_ones", img_ones);
+	 imshow("img_out", img_out);
+	 imshow("img_dt", img_dt);
+
+	 //showImages(0, 14, imgs);
 
 	 waitKey(0);
 	 destroyAllWindows();
