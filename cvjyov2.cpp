@@ -210,8 +210,10 @@ int main(int argc, char** argv) {
 
 	 //imshow("otsu_32", img_otsu_32);
 
+	 Mat img_ones_init(img_gray.rows, img_gray.cols, CV_32F, Scalar::all(0.8));
 	 Mat img_ones(img_gray.rows, img_gray.cols, CV_32F, Scalar::all(0.8));
-	 bitwise_and(img_otsu_32,img_ones,img_ones);
+
+	 bitwise_and(img_otsu_32,img_ones_init,img_ones);
 
 	 Mat img_dt(img_gray.rows, img_gray.cols, CV_32F, Scalar::all(0));
 
