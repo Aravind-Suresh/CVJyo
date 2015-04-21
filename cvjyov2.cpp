@@ -366,7 +366,7 @@ int main(int argc, char** argv) {
 
 	imshow("img18", imgs[18]);
 
-	//showImages(0, 14, imgs);
+	showImages(0, 18, imgs);
 
 	waitKey(0);
 	destroyAllWindows();
