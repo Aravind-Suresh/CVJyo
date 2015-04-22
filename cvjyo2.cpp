@@ -9,6 +9,15 @@ using namespace cv;
 using namespace std;
 
 
+void distTransform(Mat input,Mat &result)
+{
+
+	for(int i=0;i<input.rows;i++)
+		for(int j=0;j<input.cols;j++)
+			if(input.at<uchar>(i,j)==255)
+				
+}
+
 void CannyThreshold(Mat src_gray, Mat& edge_gray, int lowThreshold, int highThreshold, int kernel_size)
 {
 	//blur( src_gray, edge_gray, Size(3,3) );
