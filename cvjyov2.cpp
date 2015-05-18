@@ -131,8 +131,15 @@ int main(int argc, char** argv) {
 	 //median blur on canny to remove salt and pepper noise
 
 	 //medianBlur(imgs[0], imgs[0], 1);
+	//bilateral blur to preserve edges while blurring
+	
 
 	Laplacian(imgs[0], imgs[1], CV_8UC1, 3);
+
+	//bilateralFilter( img_gray,imgs[2],9,80,80,BORDER_DEFAULT );
+
+	//adaptiveBilateralFilter(img_gray,imgs[2],Size(5,5), 100,20.0,Point(-1, -1),BORDER_DEFAULT );
+
 	GaussianBlur( imgs[1], imgs[2], Size(5,5), 2, 2 );
 	imshow("temp-2", imgs[2]);
 
@@ -144,7 +151,7 @@ int main(int argc, char** argv) {
 
 	sort(contours.begin(),contours.end(),comparatorContourAreas);
 	int size1 = contours.size();
-
+	cout<<"\nsize of contour "<<size1;
 	vector<int> hull;
 
 	convexHull(Mat(contours[size1-1]), hull,false);
@@ -183,6 +190,7 @@ int main(int argc, char** argv) {
 		circle(imgs[5], contours[size1-1][startIdx] , 10, color, 2, 8, 0 );
 		circle(imgs[6], contours[size1-1][endIdx] , 10, color, 2, 8, 0 );
 	}
+cout<<"\ndefect points size"<<defectsPoints.size();
 
 	Point2f minEncCirCenter;
 	float minEncRad;
@@ -264,15 +272,13 @@ int main(int argc, char** argv) {
 
 	CannyThreshold(img_out,img_out_edge,lowThreshold, lowThreshold*ratio, kernel_size);
 
-<<<<<<< HEAD
-	 Mat img_ones_init(img_gray.rows, img_gray.cols, CV_32F, Scalar::all(0.8));
-	 Mat img_ones(img_gray.rows, img_gray.cols, CV_32F, Scalar::all(0.8));
+	 // Mat img_ones_init(img_gray.rows, img_gray.cols, CV_32F, Scalar::all(0.8));
+	 // Mat img_ones(img_gray.rows, img_gray.cols, CV_32F, Scalar::all(0.8));
 
-	 bitwise_and(img_otsu_32,img_ones_init,img_ones);
-=======
+	 // bitwise_and(img_otsu_32,img_ones_init,img_ones);
+	
 	dilate( img_out_edge, img_out_edge_dil, element ); 
 	//img_out_edge.copyTo(img_out_edge_dil);
->>>>>>> 44054ed2961f62cd5cc7fce277c43df2b4cd97ed
 
 	imshow("edge_dil", img_out_edge_dil);
 
@@ -372,6 +378,22 @@ int main(int argc, char** argv) {
 	}
 
 	imshow("img18", imgs[18]);
+
+	int erosion_size2 = 8;
+
+	Mat elementErode2 = getStructuringElement( erosion_type[1],
+		Size( 2*erosion_size2 + 1, 2*erosion_size2+1 ),
+		Point( erosion_size2, erosion_size2 ) );
+
+	erode(imgs[12], imgs[19], elementErode2);
+	Mat diff=imgs[12]-imgs[19];  // actually gives the prints inside because img[13] is 
+
+	bitwise_and(diff,imgs[0],imgs[20]);
+
+	imshow("diff", diff);
+	imshow("img19", imgs[19]);
+	imshow("img20", imgs[20]);
+
 
 	//showImages(0, 14, imgs);
 
