@@ -28,8 +28,6 @@ void binaryAbsDiff(Mat src1, Mat src2, Mat& res )
 	}
 }
 
-
-
 int slopeStrLine(Point a, Point b)
 {
 	if(a.x-b.x)
@@ -345,12 +343,27 @@ cout<<"\ndefect points size"<<defectsPoints.size();
 
 	//vector<int> counters1(contours.size());
 
-	vector<int> totalPoints(contours.size());
+	Mat elementErode1 = getStructuringElement( erosion_type[1],
+		Size( 2*erosion_size + 1, 2*erosion_size+1 ),
+		Point( erosion_size, erosion_size ) );
 
-	for(int i=0;i<contours.size();i++) {
+
+	erode(imgs[12], imgs[19], elementErode1);
+	bitwise_and(imgs[20], imgs[19], imgs[19]);
+	//GaussianBlur( imgs[19], imgs[19], Size(3,3), 2, 2 );
+	//CannyThreshold(imgs[19], imgs[19], lowThreshold, lowThreshold*ratio, kernel_size);
+	//Laplacian(imgs[19], imgs[19], CV_8UC1, 3);
+
+	vector<vector<Point> > contours5;
+	vector<Vec4i> hierarchy5;
+	findContours(imgs[19], contours5, hierarchy5, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+
+	vector<int> totalPoints(contours5.size());
+
+	for(int i=0;i<contours5.size();i++) {
 		for(int j=0;j<imgs[0].rows;j++) {
 			for(int k=0;k<imgs[0].cols;k++) {
-				if(pointPolygonTest(contours[i], Point(k,j) , false) != -1) {
+				if(pointPolygonTest(contours5[i], Point(k,j) , false) != -1) {
 					totalPoints[i]++;
 				}
 			}
@@ -359,21 +372,23 @@ cout<<"\ndefect points size"<<defectsPoints.size();
 
 	//actually the handprint wasn't recognised as a closed contour at all.. thats y it cups.. otherwise this idea will work fine.
 
-	float fractionOfWhitePoints = 0.9;
+	float fractionOfWhitePoints = 0;
 
-	for(int i=0;i<contours.size();i++) {
+	cout<<contours5.size()<<endl;
+
+	for(int i=0;i<contours5.size();i++) {
 		int ctr = 0;
 		for(int j=0;j<whitePoints.size();j++) {
-			if(pointPolygonTest(contours[i], whitePoints[j], false) != -1) {
+			if(pointPolygonTest(contours5[i], whitePoints[j], false) != -1) {
 				ctr++;
 			}
 		}
 		if(ctr!=0) {
 			cout<<i<<"  "<<ctr<<"  "<<totalPoints[i]<<endl;
 		}
-		if(ctr>=fractionOfWhitePoints*totalPoints[i]) {
+		if(ctr>fractionOfWhitePoints*totalPoints[i]) {
 			cout<<"contour : "<<i<<endl;
-			drawContours(imgs[18],contours,i, Scalar(0,0,0),1, 8, hierarchy);
+			drawContours(imgs[18],contours5,i, Scalar(255,255,255),1, 8, hierarchy5);
 		}
 	}
 
@@ -396,6 +411,28 @@ cout<<"\ndefect points size"<<defectsPoints.size();
 
 
 	//showImages(0, 14, imgs);
+	GaussianBlur( imgs[19], imgs[20], Size(0,0), 2, 2 );
+	float alpha = 1.05;
+	addWeighted(imgs[19], alpha, imgs[20], 1 - alpha, 0.0, imgs[19]);
+
+	float alpha2 = 0.33;
+	Laplacian(imgs[0], imgs[21], CV_8UC1, 3);
+	addWeighted(imgs[22], alpha2, imgs[21], 1 - alpha2, 0.0, imgs[22]);
+
+	//showImages(0, 19, imgs);
+
+	imshow("img21", imgs[21]);
+	imshow("img22", imgs[22]);
+
+	vector<vector<Point> > contours6;
+	vector<Vec4i> hierarchy6;
+
+	findContours(imgs[22], contours6, hierarchy6, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+
+	cout<<endl<<contours6.size();
+	drawContours(imgs[22],contours6,-1, Scalar(255,255,255) ,2, 8, hierarchy6);
+
+	imshow("img22-c", imgs[22]);
 
 	waitKey(0);
 	destroyAllWindows();
