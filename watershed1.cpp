@@ -46,28 +46,14 @@ int main(int argc, char** argv) {
 		Point( erosion_size, erosion_size ) );
 
 	threshold(img_gray, img_gray_otsu, 0, 255, THRESH_BINARY + THRESH_OTSU);
-	erode(img_gray_otsu, img1, getStructuringElement(erosion_type[1], Size(3,3), Point(1,1)));
-	namedWindow("otsu", WINDOW_AUTOSIZE);
 	imshow("otsu", img_gray_otsu);
 
-/*
-	Laplacian(img_gray, img_gray, ddepth, kernel_size, scale, delta, BORDER_DEFAULT);
-
-	bitwise_and(img1, img_gray, img_gray);
-
-
-	erode(img_gray, img_gray, elementErode);
-	dilate(img_gray, img_gray, elementDilate);
-
-	namedWindow("lapl-img", WINDOW_AUTOSIZE);
-	imshow("lapl-img", img_gray);
-*/
-	
-	GaussianBlur( img_gray, img_gray, Size(5, 5), 2, 100);
-
 	threshold(img_gray, img_gray_thresh, 0, 255, THRESH_BINARY + THRESH_OTSU);
+	//img_gray_thresh = ~img_gray_thresh;
 	//bitwise_not(img_gray_thresh, img_gray_thresh);
-	namedWindow("thresh", WINDOW_AUTOSIZE);
+	//namedWindow("thresh", WINDOW_AUTOSIZE);
+	dilate(img_gray_thresh, img_gray_thresh, elementDilate);
+	erode(img_gray_thresh, img_gray_thresh, elementErode);
 	imshow("thresh", img_gray_thresh);
 
 	distanceTransform(img_gray_thresh, img_gray_d_t, CV_DIST_L2, 3);
@@ -77,24 +63,9 @@ int main(int argc, char** argv) {
 
 	img_gray_d_t.copyTo(img_gray_d_t_G);
 
-	threshold(img_gray_d_t_G, img_gray_d_t_thresh_G, (float) (value/255), 1, THRESH_BINARY);
+	threshold(img_gray_d_t_G, img_gray_d_t_thresh_G, 0.3, 1, THRESH_BINARY);
 	namedWindow("dt-thresh", WINDOW_AUTOSIZE);
 	imshow("dt-thresh", img_gray_d_t_thresh_G);
-	createTrackbar("Threshold value","dt-thresh",&value,255,dt_thresh_callback);
-
-	vector<Vec4i> lines;
-
-	img_gray_d_t_G.convertTo(img_gray_d_t_G, CV_8UC1);
-
-	/*HoughLinesP(img_gray_d_t_G, lines, 1, CV_PI/180, 25, 15, 20);
-
-	for(size_t i=0;i<lines.size();i++) {
-		cout<<"Line from : ("<<lines[i][0]<<","<<lines[i][1]<<") to ("<<lines[i][2]<<","<<lines[i][3]<<")"<<endl;
-		line(img_bgr, Point(lines[i][0], lines[i][1]), Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 3, 8);
-	}*/
-
-	namedWindow("lines", WINDOW_AUTOSIZE);
-	imshow("lines", img_bgr);
 
 	waitKey(0);
 
