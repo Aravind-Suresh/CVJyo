@@ -82,7 +82,7 @@ int main(int argc, char** argv)
 	namedWindow("img_cropped_edge", WINDOW_AUTOSIZE);
 	imshow("img_cropped_edge",img_cropped_edge);
 
-	
+		
 
 waitKey(0);
 }
